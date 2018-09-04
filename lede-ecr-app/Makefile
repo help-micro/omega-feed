@@ -1,17 +1,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.42
+PKG_VERSION:=1.0.45
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_RELEASE).tar.gz
-PKG_MIRROR_HASH:=bbcf70f8b0a64fc631e2a62526d9270e3c49b52c7427c11983618931a03ae644
+PKG_MIRROR_HASH:=bbcf70f8b0a64fc631e2a62526d9270e3c49b52c7427c11983618931a03ae643
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/help-micro/omega-lede-ecr-app.git
+PKG_SOURCE_URL:=https://github.com/help-micro/lede-ecr-app.git
 PKG_SOURCE_VERSION:=$(PKG_REV)
 
 include $(INCLUDE_DIR)/package.mk
