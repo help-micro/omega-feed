@@ -1,0 +1,505 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-icons/iron-icons.html">
+
+<dom-module id="onion-settings-3g">
+	<style>
+		body {
+			background-color: #f2f2f2;
+			padding-top: 4rem;
+			padding-bottom: 4rem;
+		}
+
+		.main {
+			background-color: #fff;
+			border-color: transparent;
+			padding: 4rem 2rem;
+			margin-bottom: 0;
+		}
+
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+
+		.card {
+			margin-top: 15px;
+			background-color: #fff;
+		}
+			.card form > .form-group:last-child {
+				margin-bottom: 0;
+			}
+
+		.loading{
+			height: 20px;
+			width: 20px;
+			margin-left: 15px;
+			-webkit-animation: rotation 1s infinite linear;
+			-moz-animation: rotation 1s infinite linear;
+			-o-animation: rotation 1s infinite linear;
+			animation: rotation 1s infinite linear;
+			border-left: 3px solid #EAF1FF;
+			border-right: 3px solid #EAF1FF;
+			border-bottom: 3px solid #EAF1FF;
+			border-top: 3px solid #2450AD;
+			border-radius: 100%
+		}
+
+		@-webkit-keyframes rotation {
+			from{
+				-webkit-transform: rotate(0deg)
+			}
+			to{
+				-webkit-transform: rotate(359deg)
+			}
+		}
+
+		@-moz-keyframes rotation {
+			from{
+				-moz-transform: rotate(0deg)
+			}
+			to{
+				-moz-transform: rotate(359deg)
+			}
+		}
+
+		@-o-keyframes rotation {
+			from{
+				-o-transform: rotate(0deg)
+			}
+			to{
+				-o-transform: rotate(359deg)
+			}
+		}
+
+		@keyframes rotation {
+			from{
+				transform: rotate(0deg)
+			}
+			to{
+				transform: rotate(359deg)
+			}
+		}
+		
+		#btn-refresh-network-3g {
+			float: right;
+		}
+		
+		.network-state-title {
+			float: left;
+		}
+		.btn-default.active, .btn-default:active, .btn-default:focus, .btn-default:hover {
+			color: #434a54;
+			background-color: #ddd;
+		}
+		
+		.status-heading {
+			color: #fff;
+			background-color: #16a085;
+			border-top-left-radius: .25rem;
+			border-top-right-radius: .25rem;
+		}
+		
+	</style>
+
+	<template>
+		<div class="container">
+			<h4 class="card-title">3G modem setup</h4>
+			<div class="card card-block">
+				<form id="modem-form">
+					<!-- removed enabled checkbox for now -- cannot disable ap anyway -->
+					<!-- <div class="form-group row"> -->
+						<!-- enabled -->
+						<!-- <label for="ap-enabled" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Enable AP Mode</label> -->
+						<!-- <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"> -->
+							<!-- <div class="checkbox"> -->
+								<!-- <label><input type="checkbox" id="enableAP" checked="{{enableAP::change}}" autocomplete="off" /></label> -->
+							<!-- </div> -->
+						<!-- </div> -->
+					<!-- </div> -->
+
+					<fieldset>
+						
+						<div class="form-group row">
+							<label for="modem-device" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Device</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<div class="row">
+									<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+										<select class="form-control c-select" id="modem-device" autocomplete="off" value="{{modemDevice::input}}">
+											<template is="dom-repeat" items="{{devices}}" as="device" >
+												<option value$={{getDevicePath(device)}} selected$="{{isDeviceSelected(device)}}">{{device}}</option>
+											  </template>
+										</select>
+									</div>
+									<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+										<button type="button" class="btn btn-default" on-click="refreshDeviceList"><iron-icon icon="icons:refresh"></iron-icon></button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<div class="form-group row">
+							<label for="modem-service" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Service</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<select class="form-control c-select" id="modem-service" autocomplete="off" value="{{modemService::input}}">
+									<option value="umts">UMTS/GPRS</option>
+									<option value="umts_only">UMTS only</option>
+									<option value="gprs_only">GPRS only</option>
+									<option value="evdo">CDMA/EV-DO</option>
+								</select>
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="modem-apn" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">APN</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="modem-apn" autocomplete="off" value="{{modemApn::input}}" />
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="modem-pin-code" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">PIN code</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="modem-pin-code" autocomplete="off" value="{{modemPinCode::input}}" />
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="modem-username" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Username</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="modem-username" autocomplete="off" value="{{modemUsername::input}}" />
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="modem-password" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Password</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="password" class="form-control" id="modem-password" autocomplete="off" value="{{modemPassword::input}}" />
+							</div>
+						</div>
+						
+						
+						<div class="form-group row">
+							<label for="modem-dial-number" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Dial number</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="modem-dial-number" autocomplete="off" value="{{modemDialNumber::input}}" />
+							</div>
+						</div>
+						
+						<div class="form-group row">
+							<label for="modem-options" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">PPPD options</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="modem-options" autocomplete="off" value="{{modemPppdOptions::input}}" />
+							</div>
+						</div>
+						
+					</fieldset>
+
+					<div class="row">
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+							<div id="modem-message">{{modemMessage}}</div>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+							<div class="layout horizontal center">
+								<button id="modem-config-button" type="button" class="btn btn-success" on-click="setupModem">Configure modem</button>
+								<div id="configureLoadingModem" class="loading" hidden></div>
+							</div>
+						</div>
+					</div>
+					
+				</form>
+			</div>
+			
+			<div class="card status user-input modemBlock">
+				<div class="card-block status-heading clearfix">
+					<div class="network-state-title">
+						<template is="dom-if" if="{{networkState.up}}">
+							<h4 class="card-title">{{networkState.ip}}</h4>
+						</template>
+						<template is="dom-if" if="{{!networkState.up}}">
+							<h4 class="card-title">Network is down</h4>
+						</template>
+						<h6 class="card-subtitle">3G Network</h6>
+					</div>
+					<button class="btn btn-default" id="btn-refresh-network-3g" on-click="refreshNetwork">
+						<iron-icon icon="icons:refresh"></iron-icon>
+					</button>
+				</div>
+				<template is="dom-if" if="{{networkState.up}}">
+					<div class="card-block">
+						<p>
+							<span>{{networkState.nextHop}}</span>
+							<br>
+							<strong>Next hop</strong>
+						</p>
+						<p>
+							<span>{{networkState.l3_device}}</span>
+							<br>
+							<strong>Interface</strong>
+						</p>
+					</div>
+				</template>
+			</div>
+		</div>
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			// var this = null;
+
+			var created = function () {
+				// this = this;
+			};
+
+			var ready = function () {
+				onionConsole.getService('onion-session-provider', function (err, sessionProvider) {
+                    this.sessionProvider = sessionProvider;
+	                // if (this.sessionProvider.isAlive() === true) {
+	                    onionConsole.getService('onion-3g-provider', function (err, modemProvider) {
+	                        this.modemProvider = modemProvider;
+						}.bind(this));
+	                // };
+                }.bind(this));
+
+     //            if (this.sessionProvider.isAlive() === true) {
+     //                onionConsole.getService('onion-wifi-provider', function (err, wifiProvider) {
+     //                    this.wifiProvider = wifiProvider;
+					// });
+     //            };
+
+			};
+
+			var init = function () {
+				this.refreshConfigInfo();
+				this.refreshNetwork();
+			};
+			
+			var refreshConfigInfo = function () {
+				var promise = new Promise(function (resolve, reject) {
+					this.setLoading(true);
+					var self = this;
+					var getConfigPromise 	= this.modemProvider.getInterfaceConfig(null);
+
+					Promise.all([getConfigPromise])
+					.then(function(values) {
+						var data = values[0].values;
+						self.set('modemDevice', data.device);
+						self.set('modemService', data.service);
+						self.set('modemPinCode', data.pincode);
+						self.set('modemApn', data.apn);
+						self.set('modemDialNumber', data.dialnumber);
+						self.set('modemUsername', data.username);
+						self.set('modemPassword', data.password);
+						self.set('modemPppdOptions', data.pppd_options);
+						// disable the loading
+						self.setLoading(false);
+						this.getDevices().
+						then(function() {	
+							// resolve the promise
+							resolve();
+						}).bind(this);
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			}
+
+			var setLoading = function (bLoading) {
+				if (bLoading) {
+					this.$.configureLoadingModem.hidden = false;
+			    	this.$['modem-config-button'].disabled = true;
+				} else {
+					this.$.configureLoadingModem.hidden = true;
+		    		this.$['modem-config-button'].disabled = false;
+				}
+			};
+
+			var onAppIcon = function (e) {
+				this.onionConsole.launchApp(e.target);
+			};
+			
+			var setupModem = function () {
+				this.setLoading(true);
+			    this.modemMessage = '';
+
+			    var verifyResult = 'OK';
+				if (!this.modemApn || this.modemApn === '') {
+					verifyResult = 'Please enter an APN';
+				}
+				
+				if (!this.modemDevice || this.modemDevice === '') {
+					verifyResult = 'Please choose the device';
+				}
+				
+				var propertyList = this.properties;
+				var attributes = {};
+				for (var attribute in propertyList) {
+					attributes[attribute] = this[attribute];
+				}
+				if (verifyResult === 'OK' && this.sessionProvider.isAlive() === true) {
+					this.modemProvider.setInterfaceConfig(null, attributes)
+					.then(function () {
+						return (this.refreshConfigInfo());
+					}.bind(this))
+					.then(function () {
+						this.setLoading(false);
+						onionConsole.sendNotification({
+							title: 'Success',
+							message: 'Changes were applied!'
+						});
+					}.bind(this))
+		        	.catch(function (err) {
+						this.setLoading(false);
+		        		onionConsole.sendNotification({
+							title: 'Error',
+							message: err
+						});
+		        	}.bind(this));
+				} else {
+				    this.modemMessage = verifyResult;
+					this.setLoading(false);
+				}
+			}
+			
+			var getDevices = function () {
+				var promise = new Promise(function (resolve, reject) {
+					this.setLoading(true);
+					var self = this;
+					this.modemProvider.getUSBDevices(null)
+						.then(function (response) {
+							self.devices = response.devices;
+							self.setLoading(false);
+							resolve();
+						}.bind(this))
+						.catch(function (err) {
+							self.setLoading(false);
+							reject();
+						}.bind(this));
+				}.bind(this));
+
+				return promise;	
+			}
+			
+			var restartNetworkService = function () {
+				var self = this;
+				if (confirm("Your connection can be lost. Continue?")) {
+					this.setLoading(true);
+					this.modemProvider.restartNetworkService(null)
+						.then(function (response) {
+							self.setLoading(false);
+							onionConsole.sendNotification({
+								title: 'Success',
+								message: 'Network service was restarted!'
+							});
+						}.bind(this))
+						.catch(function (err) {
+							self.setLoading(false);
+						}.bind(this));
+				}
+			}
+			
+			var refreshDeviceList = function () {
+				this.getDevices();
+			}
+			
+			var getDevicePath = function (device) {
+				return "/dev/" + device;
+			}
+			
+			var isDeviceSelected = function (device) {
+				return this.getDevicePath(device) == this.modemDevice;
+			}
+			
+			var refreshNetwork = function () {
+				var self = this;
+				this.modemProvider.getNetworkState(null)
+				.then(function(result) {
+					if (result.up) {
+						result.ip = result["ipv4-address"][0]["address"] + '/' + result["ipv4-address"][0]["mask"];
+						result.nextHop = result["route"][0]["nexthop"];
+					}
+					self.networkState = result;
+				}.bind(this))
+				.catch(function (err) {
+					onionConsole.sendNotification({
+						title: 'Error',
+						message: err
+					});
+				});
+			}
+
+
+			Polymer({
+				is: 'onion-settings-3g',
+				created: created,
+				ready: ready,
+				init: init,
+				setLoading: setLoading,
+				refreshConfigInfo: refreshConfigInfo,
+				setupModem: setupModem,
+				getDevices: getDevices,
+				getDevicePath: getDevicePath,
+				isDeviceSelected: isDeviceSelected,
+				refreshDeviceList: refreshDeviceList,
+				restartNetworkService: restartNetworkService,
+				refreshNetwork: refreshNetwork, 
+				properties: {
+					devices: {
+						type: Array,
+						notify: true,
+						value: []
+					},
+					modemDevice: {
+						type: String,
+						notify: true
+					},
+					modemService: {
+						type: String,
+						notify: true
+					},
+					modemPinCode: {
+						type: String,
+						notify: true
+					},
+					modemApn: {
+						type: String,
+						notify: true
+					},
+					modemDialNumber: {
+						type: String,
+						notify: true
+					},
+					modemUsername: {
+						type: String,
+						notify: true,
+						value: ''
+					},
+					modemPassword: {
+						type: String,
+						notify: true,
+						value: ''
+					},
+					modemPppdOptions: {
+						type: String,
+						notify: true,
+						value: ''
+					},
+					networkState: {
+						type: Object,
+						notify: true,
+						value: function() {
+							return {
+								'nextHop': '-',
+								'l3_device': '-'
+							};
+						}
+					}
+				}
+			});
+		})();
+	</script>
+</dom-module>

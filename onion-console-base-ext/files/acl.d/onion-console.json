@@ -1,0 +1,124 @@
+{
+        "onion-console": {
+                "description": "Permissions to allow onion-console to work properly",
+                "read": {
+                        "ubus": {
+                                "file": [
+                                        "list",
+                                        "read",
+                                        "exec",
+                                        "write",
+                                        "stat"
+                                ],
+                                "onion": [
+                                        "wifi-scan",
+                                        "oupgrade",
+                                        "wifi-setup",
+                                        "omega-led",
+                                        "gpio"
+                                ],
+                                "onion-console": [
+                                        "app-list",
+                                        "wifi-info"
+                                ],
+                                "system": [
+                                        "info",
+                                        "hostname",
+                                        "board"
+                                ],
+                                "iwinfo": [
+                                        "assoclist"
+                                ],
+                                "network.device": [
+                                        "status"
+                                ],
+                                "network.interface.wwan": [
+                                        "status"
+                                ],
+                                "network.interface.usb0": [
+                                        "status"
+                                ],
+				"network.interface.ppp0": [
+					"status"
+				],
+                                "network.interface": [
+                                        "dump"
+                                ],
+                                "uci": [
+                                        "*"
+                                ],
+                                "onion-helper": [
+                                        "*"
+                                ],
+                                "onion-bt": [
+                                        "*"
+                                ],
+				"network.interface.bnep0": [
+					"status"
+				],
+                        },
+                        "uci": [
+                                "get",
+                                "delete",
+                                "rpcd",
+                                "system",
+                                "wireless",
+                                "network",
+                                "onion",
+                                "mjpg-streamer"
+                        ]
+                },
+                "write": {
+                        "ubus": {
+                                "onion": [
+                                        "wifi-scan",
+                                        "wifi-setup",
+                                        "oupgrade",
+                                        "omega-led",
+                                        "gpio"
+                                ],
+                                "i2c_exp": [
+                                        "pwm-exp",
+                                        "relay-exp",
+                                        "oled-exp"
+                                ],
+                                "onion-console": [
+                                        "app-list"
+                                ],
+                                "file": [
+                                        "list",
+                                        "read",
+                                        "exec",
+                                        "write",
+                                        "stat"
+                                ],
+                                "system": [
+                                        "info",
+                                        "hostname"
+                                ],
+                                "rpc-sys": [
+                                        "reboot",
+                                        "password_set"
+                                ]
+                        },
+                        "uci": [
+                                "get",
+                                "set",
+                                "commit",
+                                "delete",
+                                "rpcd",
+                                "system",
+                                "wireless",
+                                "network",
+                                "onion",
+                                "mjpg-streamer"
+                        ],
+                        "cgi-io": {
+                                "upload": [
+                                        "write"
+                                ]
+                        }
+                }
+        }
+
+}

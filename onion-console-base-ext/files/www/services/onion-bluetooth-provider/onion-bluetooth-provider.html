@@ -1,0 +1,217 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/promise-polyfill/promise-polyfill-lite.html">
+
+<dom-module id="onion-bluetooth-provider">
+	<script>
+		'use strict';
+
+		(function () {
+			// var this = null;
+
+			var created = function () {
+				// this = this;
+			};
+
+
+			var ready = function () {
+				// set default value for deviceRadio
+				//this.deviceRadio = 'ra0';
+
+				// set the deviceRadio based on the device type
+				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+					this.deviceProvider = deviceProvider;
+				}.bind(this));
+			};
+			
+			var getState = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'state', {
+					}, function (err, response) {
+						if (response && response.isDeviceDetected) {
+							resolve( response );
+						} else {
+							reject('Unable to detect the bluetooth device.');
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+
+			var setAdapterPower = function (devId, state) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'power', {
+						"state": state
+					}, function (err, response) {
+						if (response && !response.err) {
+							resolve(response);
+						} else {
+							reject('Unable to change bluetooth power.');
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			}
+			
+			var scanDevices = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'scan', {
+						
+					}, function (err, response) {
+						if (response) {
+							resolve(response);
+						} else {
+							reject('Unable to fetch devices.');
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			}
+			
+			var stopScan = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'scanStop', {
+					}, function (err, response) {
+						if (!err) {
+							resolve(response);
+						} else {
+							reject('Unable to stop discovery.');
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			}
+			
+			var getDevices = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'getDevices', {
+						
+					}, function (err, response) {
+						if (response && response.devices) {
+							resolve(response);
+						} else {
+							reject('Unable to fetch devices.');
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			}
+			
+			var pairDevice = function (devId, address) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'pair', {
+						"address": address
+					}, function (err, response) {
+						if (response && !response.err) {
+							resolve(response);
+						} else {
+							var message = 'Unable to pair'
+							if (response && response.err) {
+								message = response.errMessage;
+							}
+							reject(message);
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+			
+			var connectToDevice = function (devId, address) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'connect', {
+						"address": address
+					}, function (err, response) {
+						if (response && !response.err) {
+							resolve(response);
+						} else {
+							var message = 'Unable to connect'
+							if (response && response.err) {
+								message = response.errMessage;
+							}
+							reject(message);
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+
+			var disconnectFromDevice = function (devId, address) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'disconnect', {
+						"address": address
+					}, function (err, response) {
+						if (response && !response.err) {
+							resolve(response);
+						} else {
+							var message = 'Unable to disconnect'
+							if (response && response.err) {
+								message = response.errMessage;
+							}
+							reject(message);
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+			
+			var removeDevice = function (devId, address) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "onion-bt", 'remove', {
+						"address": address
+					}, function (err, response) {
+						if (response && !response.err) {
+							resolve(response);
+						} else {
+							var message = 'Unable to remove device'
+							if (response && response.err) {
+								message = response.errMessage;
+							}
+							reject(message);
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+			
+			var getNetworkState = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					this.deviceProvider.callService(devId, "network.interface.bnep0", 'status', {
+						
+					}, function (err, response) {
+						if (response) {
+							resolve(response);
+						} else {
+							var message = 'Unable to fetch network status';
+							reject(message);
+						}
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			}
+
+			Polymer({
+				is: 'onion-bluetooth-provider',
+				created: created,
+				ready: ready,
+				noop: function () {},
+
+				//Get state
+				getState: getState,
+				setAdapterPower: setAdapterPower,
+				scanDevices: scanDevices,
+				stopScan: stopScan,
+				getDevices: getDevices,
+				pairDevice: pairDevice,
+				connectToDevice: connectToDevice,
+				disconnectFromDevice: disconnectFromDevice,
+				removeDevice: removeDevice,
+				getNetworkState: getNetworkState,
+				properties: {
+				}
+			});
+		})();
+	</script>
+</dom-module>

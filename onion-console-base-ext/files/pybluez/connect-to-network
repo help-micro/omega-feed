@@ -1,0 +1,49 @@
+#!/usr/bin/python
+
+from __future__ import absolute_import, print_function, unicode_literals
+
+from optparse import OptionParser, make_option
+import sys
+import time
+import dbus
+import json
+import bluezutils
+
+bus = dbus.SystemBus()
+response = { "err": 0, "errMessage": "" }
+manager = dbus.Interface(bus.get_object("org.bluez", "/"),
+						"org.bluez.Manager")
+
+option_list = [
+		make_option("-i", "--device", action="store",
+				type="string", dest="dev_id"),
+		]
+parser = OptionParser(option_list=option_list)
+
+(options, args) = parser.parse_args()
+
+if (len(args) < 1):
+	print("Usage: %s <address> [service]" % (sys.argv[0]))
+	sys.exit(1)
+
+service = "nap"
+
+isConnectCommand = 1
+if (len(args) > 1):
+	isConnectCommand = 0
+
+try:
+	device = bluezutils.find_device(args[0], options.dev_id)
+	network = dbus.Interface(bus.get_object("org.bluez", device.object_path),
+						"org.bluez.Network1")
+	if isConnectCommand:
+		iface = network.Connect(service)
+	else:
+		network.Disconnect()
+except dbus.DBusException, e:
+	response["err"] = 1
+	response["errMessage"] = "Unable to connect to the network. Check your modem settings."
+except Exception, e:
+	response["err"] = 1
+	response["errMessage"] = str(e)
+print(json.dumps(response))

@@ -1,0 +1,475 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/promise-polyfill/promise-polyfill-lite.html">
+
+<dom-module id="onion-wifi-provider">
+	<script>
+		'use strict';
+
+		(function () {
+			// var this = null;
+
+			var created = function () {
+				// this = this;
+			};
+
+			var apSetupResult = null;
+			var wpaKeyMinLength = 8;
+			var wepKeyMinLength = 10;
+			var wepKeyMaxLength = 26;
+			var regEx = new RegExp(/^[0-9A-Fa-f]+$/);
+
+			var ready = function () {
+				// set default value for deviceRadio
+				//this.deviceRadio = 'ra0';
+
+				// set the deviceRadio based on the device type
+				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+					console.log("DeviceProvider:",deviceProvider);
+					console.log("err:",err);
+					this.deviceProvider = deviceProvider;
+					deviceProvider.getDeviceType('', function(result){
+						this.device = result;
+						if (result === 'Onion Omega2' || result === 'Onion Omega2+') {
+							this.deviceRadio = 'ra0';
+						} else if (result === 'Onion Omega') {
+						 	this.deviceRadio = 'wlan0';
+						}
+					}.bind(this));
+				}.bind(this));
+			};
+
+			// return list of configured networks from wifisetup
+			//	returns null if STA intf is disabled
+			var getConfiguredNetworkList = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						this.deviceProvider = deviceProvider;
+						this.deviceProvider.callService(devId,'onion', 'wifi-setup', {
+							command: 'list',
+							params: {}
+						}, function (err, response) {
+							if (response && response.results) {
+								resolve( response.results );
+							} else {
+								reject(Error('Unable to read wireless settings.'));
+							}
+						}.bind(this));
+					}.bind(this));
+
+				}.bind(this));
+
+				return promise;
+			};
+
+			// return AP network configuration from wifisetup
+			var getApNetworkInfo = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						this.deviceProvider = deviceProvider;
+						this.deviceProvider.callService(devId, 'onion', 'wifi-setup', {
+							command: '-ap list',
+							params: {}
+						}, function (err, response) {
+							if (response && response.results && response.results[0]) {
+								resolve( response.results[0] );
+							} else {
+								reject(Error('Unable to read wireless settings.'));
+							}
+						}.bind(this));
+					}.bind(this));
+
+				}.bind(this));
+
+				return promise;
+			};
+
+			// uci get call to find the wlan static ip address
+			var getApStaticIpAddr = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						deviceProvider.callService(devId,'uci', 'get', {
+							config: 	'network',
+							section: 	'wlan',
+							option: 	'ipaddr'
+						}, function (err, result) {
+							if (!err) {
+								resolve( result.value );
+							} else {
+								reject(Error('Unable to read wireless settings.'));
+							}
+						});
+					});
+				}.bind(this));
+				return promise;
+			};
+
+			var wifiScan = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+					this.deviceProvider = deviceProvider;
+						this.deviceProvider.callService(devId,'onion', 'wifi-scan', {
+							device: this.deviceRadio
+						}, function (err, data) {
+							if (!err && data) {
+								if (data && data.results !== null) {
+									resolve(data);
+								} else {
+									reject(Error('No available WiFi networks found.'));
+								}
+							} else {
+								reject(Error('Wi-Fi scan failed!'));
+							}
+						});
+					}.bind(this));
+				}.bind(this));
+				return promise;
+			};
+
+			// populate a wifi network
+			var setupWifiNetwork = function (devId, ssid, password, auth, bAp) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						if (!err) {
+							this.deviceProvider = deviceProvider;
+							var cmd = 'add';
+							if (bAp) cmd = '-ap edit';
+
+							this.deviceProvider.callService(devId,'onion', 'wifi-setup', {
+								command: cmd,
+								base64: true,
+								params: {
+									ssid: btoa(ssid),
+									password: btoa(password),
+									encr: btoa(auth)
+								}
+							}, (function (err, resp) {
+								if (resp) {
+									if (resp.success) {
+										console.log('Successfully added wireless network');
+										resolve();
+									} else {
+										console.log('Unable to add wireless network.');
+										reject(Error('Unable to add wireless network'));
+									}
+								} else {
+									console.log('Sending request to add wireless network failed');
+									reject(Error('Sending request to add wireless network failed'));
+								}
+							}).bind(this));
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			};
+
+			// change settings of AP network
+			// it either:
+			//	enable and change settings of the ap network
+			// 	disable the AP
+			var setupAp = function (devId, enabledAP, apSsid, apPassword, apAuth) {
+				// lazar@onion.io: ensuring we only change the AP configuration
+				enabledAP = true;
+
+				if (enabledAP) {
+					// enable the AP
+					console.log('Enable AP');
+
+					var promise = new Promise(function (resolve, reject) {
+						// set the wireless info
+						this.setupWifiNetwork(devId, apSsid, apPassword, apAuth, true)
+						.then(function(err, result) {
+							console.log('setupAp: ', result);
+							if (err) reject(Error(err));
+							else resolve();
+						}.bind(this))
+					}.bind(this));
+				}
+				else {
+					// lazar@onion.io: no way to disable the AP now, come back to this when the driver is updated
+					// disable the AP
+					console.log('Disable AP');
+				}
+
+				return promise;
+			};
+
+			// move a network's priority
+			var changeNetworkOrder = function (devId, ssid, moveParam) {
+				var promise = new Promise(function (resolve, reject) {
+					var bValidInput = false;
+					//	check that argument is ok then make the call
+					switch (moveParam) {
+						case 'up':
+						case 'down':
+						case 'top':
+							bValidInput = true;
+							break;
+						default:
+							break;
+					}
+					if (!bValidInput) {
+						reject(Error('Invalid move parameter'));
+					} else {
+						this.deviceProvider.callService(devId,'onion', 'wifi-setup', {
+							command: 'priority',
+							base64: true,
+							params: {
+								ssid: btoa(ssid),
+								move: btoa(moveParam)
+							}
+						}, (function (err, resp) {
+							console.log('wifisetup priority response: ', resp);
+							if (resp) {
+								if (resp.success) {
+									console.log('Successfully updated network priority');
+									resolve();
+								} else {
+									console.log('Unable to change network priority.');
+									reject(Error('Unable to change network priority.'));
+								}
+							} else {
+								console.log('Sending request to change wireless network priority failed');
+								reject(Error('Sending request to change wireless network priority failed'));
+							}
+						}).bind(this));
+					}
+				}.bind(this));
+
+				return promise;
+			};
+
+			// remove a newtork
+			var removeWifiNetwork  = function (devId, ssid) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						if (!err) {
+							this.deviceProvider = deviceProvider;
+							this.deviceProvider.callService(devId,'onion', 'wifi-setup', {
+								command: 'remove',
+								base64: true,
+								params: {
+									ssid: btoa(ssid)
+								}
+							}, function (err, resp) {
+								if (resp) {
+									if (resp.success) {
+										console.log('Successfully removed network');
+										resolve();
+									} else {
+										console.log('Unable to remove network.');
+										reject(Error('Unable to remove network.'));
+									}
+								} else {
+									console.log('Sending request to remove wireless network configuration failed');
+									reject(Error('Sending request to remove wireless network configuration failed'));
+								}
+							}.bind(this));
+						}
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+				// old code
+				// var sectionName 	= networkObj['.name'];
+				// var promise 		= this.deleteWirelessNetwork(devId, sectionName);
+				//
+				// return promise;
+			}
+
+			//// supporting functions ////
+			// validate key
+			// TODO: redo this function so it returns an object
+			var verifyKey = function (key, authType) {
+				var verfyResult = 'OK';
+
+				var length = 0;
+				if (key != null) {
+					length = key.length;
+				}
+
+				if (authType === 'psk' || authType === 'psk2') {
+					if (length < wpaKeyMinLength) {
+						verfyResult = 'WPA/WPA2 key should be at least eight (8) characters long';
+					}
+				} else if (authType === 'wep') {
+					if (length !== wepKeyMinLength && length !== wepKeyMaxLength) {
+						verfyResult = 'WEP key should be ten (10) or twenty-six (26) characters long';
+					} else {
+						if (regEx.test(key) === false) {
+							verfyResult = 'WEP key should be a hexdecimal string';
+						}
+					}
+				}
+
+				return verfyResult;
+			};
+
+			// commit wireless changes
+			var commitWirelessChanges = function (devId) {
+				var promise = new Promise(function (resolve, reject) {
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+							deviceProvider.callService(devId,'uci', 'commit', {
+							config: 'wireless'
+						}, function (err, result) {
+							if (!err) {
+								resolve();
+							} else {
+								reject(Error('Unable to remove commit wireless network changes.'));
+							}
+						});
+					});
+				});
+				return promise;
+			};
+
+			// set the static IP for the wlan network
+			var setWlanStaticIp = function (devId, ipAddr) {
+				var promise = new Promise(function (resolve, reject) {
+					//uci set network.wlan.ipaddr
+
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						deviceProvider.callService(devId,'uci', 'set', {
+							config: 'network',
+							section: 'wlan',
+							values: {
+								ipaddr: ipAddr
+							}
+						}, function (err,result) {
+							console.log('uci commit network result:', result);
+							if (!err) {
+								deviceProvider.callService(devId,'uci', 'commit', {
+										config: 'network'
+								}, function (err,result) {
+									if (!err) {
+										resolve();
+									} else {
+										reject(Error('Unable to edit Access Point network settings.'));
+									}
+								});
+							} else {
+								reject(Error('Unable to edit Access Point network settings.'));
+							}
+						});
+					});
+				});
+
+				return promise
+			};
+
+			var checkStaEnabled = function (devId) {
+				return _checkIfaceEnabled(devId, 'sta');
+			};
+
+			var _checkIfaceEnabled = function (devId, IfaceName) {
+				var promise = new Promise(function (resolve, reject) {
+					if (IfaceName === 'sta' || IfaceName === 'ap') {
+						onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+							deviceProvider.callService(null, 'uci', 'get', {
+								config: 'wireless',
+								section: IfaceName,
+								option: 'disabled'
+							}, function(err, response){
+								if (err) {
+									reject(Error('Invalid response from device'));
+								} else if (response && response.value){
+									var disabled = parseInt(response.value) == 1 ? true : false;
+									var enabled = !disabled;
+									resolve (enabled);
+								} else {
+									reject(Error('Invalid response from device'));
+								}
+							}.bind(this));
+						}.bind(this));
+					} else {
+						reject(Error('Invalid interface'));
+					}
+				}.bind(this));
+				return promise;
+			};
+
+			var setStaEnable = function (devId, bEnable) {
+				_setIfaceEnable(devId, 'sta', bEnable)
+				.then(function (result) {
+					return(commitWirelessChanges(devId));
+				})
+				.catch(function(err) {
+					console.error('Setting STA enable was not successful');
+				});
+			};
+
+			var _setIfaceEnable = function (devId, IfaceName, bEnable) {
+				var promise = new Promise(function (resolve, reject) {
+					if (IfaceName === 'sta' || IfaceName === 'ap') {
+						onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+							deviceProvider.callService(null, 'uci', 'set', {
+								config: 'wireless',
+								section: IfaceName,
+								values: {
+									'disabled' : !bEnable
+								}
+							}, function(err, response){
+								if (err) {
+									reject(Error('Invalid response from device'));
+								} else {
+									resolve();
+								}
+							}.bind(this));
+						}.bind(this));
+					} else {
+						reject(Error('Invalid interface'));
+					}
+				}.bind(this));
+				return promise;
+			}
+
+			Polymer({
+				is: 'onion-wifi-provider',
+				created: created,
+				ready: ready,
+				noop: function () {},
+				ready: ready,
+
+				//scanning
+				wifiScan: wifiScan,
+
+				// ap related functions
+				getApNetworkInfo: getApNetworkInfo,
+				setupAp: setupAp,
+
+				getApStaticIpAddr: getApStaticIpAddr,
+				setWlanStaticIp: setWlanStaticIp,
+
+				// get network list
+				getConfiguredNetworkList: getConfiguredNetworkList,
+
+				// setup network functions
+				setupWifiNetwork: setupWifiNetwork,
+
+				changeNetworkOrder: changeNetworkOrder,
+				removeWifiNetwork: removeWifiNetwork,
+
+				verifyKey: verifyKey,
+
+				// uci parameter functions
+				checkStaEnabled: checkStaEnabled,
+				setStaEnable: setStaEnable,
+
+				commitWirelessChanges: commitWirelessChanges,
+
+				properties: {
+					device:{
+						type: String,
+						value: '',
+						notify: true
+					},
+					deviceRadio: {
+						type: String,
+						value: 'ra0',
+						notify: true
+					}
+				}
+			});
+		})();
+	</script>
+</dom-module>

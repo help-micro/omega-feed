@@ -1,0 +1,33 @@
+#!/usr/bin/python
+
+import dbus
+import bluezutils
+from optparse import OptionParser, make_option
+import json
+
+ADAPTER_IFACE = "org.bluez.Adapter1"
+parser = OptionParser()
+(options, args) = parser.parse_args()
+if (len(args) < 1):
+	value = dbus.Boolean(0)
+else:
+	if (args[0] == "on"):
+		value = dbus.Boolean(1)
+	else:
+		value = dbus.Boolean(0)
+
+bus = dbus.SystemBus()
+
+response = {"isPowerOn": 0, "err": 0}
+
+try:
+	adapter_path = bluezutils.find_adapter().object_path
+	adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.freedesktop.DBus.Properties")
+
+	adapter.Set(ADAPTER_IFACE, "Powered", value)
+	response["isPowerOn"] = adapter.Get(ADAPTER_IFACE, "Powered")
+	if response["isPowerOn"] != value:
+		response["err"] = 1
+except Exception, e:
+	response["err"] = 1
+print(json.dumps(response))

@@ -1,0 +1,69 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../elements/onion-app/onion-app.html">
+
+<dom-module id="onion-terminal">
+	<style>
+		:host {
+			display: block;
+	  		height: 100%;
+			width: 100%;
+		}
+
+		#sshContainer {
+			height: 100%;
+			width: 100%;
+			padding-top: 50px;
+		   }
+
+		#shellinabox {
+			background: transparent;
+			border: none;
+			width: 100%;
+/*			height: 100%;*/
+			height: 1000px;
+/*			display: block;*/
+			margin: 0;
+			padding: 0;
+		}
+		#iframeContainer{
+			height: 100%;
+			width: 100%;
+		}
+		iframe{
+			height: 100%;
+			width: 100%;
+		}
+	</style>
+	<template>
+		<onion-app app-name="Terminal" toolbar-background="#505050">
+			<onion-app-body page-id="home">
+				<div id="iframeContainer" class="layout horizontal center-justified start">
+					<iframe id="shellinabox" src="{{sourceIP}}"></iframe>
+				</div>
+			</onion-app-body>
+		</onion-app>
+	</template>
+	<script>
+		'use strict';
+
+		(function () {
+			// var self = null;
+
+			var created = function () {
+				// self = this;
+			};
+
+			var ready = function() {
+				this.title = 'Onion Terminal';
+				this.sourceIP = window.location.origin + ':4200';
+			};
+
+			Polymer({
+				is: 'onion-terminal',
+				created: created,
+				ready: ready,
+				behaviors: [Onion.AppBehavior],
+			});
+		})();
+	</script>
+</dom-module>

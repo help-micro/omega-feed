@@ -1,0 +1,23 @@
+#!/usr/bin/python
+
+from __future__ import absolute_import, print_function, unicode_literals
+
+import dbus
+import json
+import bluezutils
+
+
+response = {"devices": []}
+bus = dbus.SystemBus()
+om = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager")
+objects = om.GetManagedObjects()
+for path, interfaces in objects.iteritems():
+	if "org.bluez.Device1" in interfaces:
+		device = interfaces["org.bluez.Device1"]
+		response["devices"].append({
+			"Alias": device["Alias"],
+			"Address": device["Address"],
+			"Paired": device["Paired"],
+			"Connected": device["Connected"]
+		})
+print(json.dumps(response))

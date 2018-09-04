@@ -1,0 +1,649 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../lib/iron-icons/iron-icons.html">
+<link rel="import" href="../../lib/iron-icons/device-icons.html">
+
+<link rel="import" href="../../lib/Onion-Console/bootstrap-modal/bootstrap-modal.html">
+<link rel="import" href="../../elements/bootstrap-button/bootstrap-button.html">
+
+<dom-module id="onion-settings-wifi">
+	<style>
+		.main {
+			background-color: #fff;
+			border-color: transparent;
+			padding: 4rem 2rem;
+			margin-bottom: 0;
+		}
+
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+
+		.card {
+			margin-top: 15px;
+			background-color: #fff;
+		}
+			.card form > .form-group:last-child {
+				margin-bottom: 0;
+			}
+
+		.loading{
+			display: var(--loading-visibility);
+			margin: var(--loading-visibility-margin);
+			height: 100px;
+			width: 100px;
+			margin-left: 15px;
+			-webkit-animation: rotation 1s infinite linear;
+			-moz-animation: rotation 1s infinite linear;
+			-o-animation: rotation 1s infinite linear;
+			animation: rotation 1s infinite linear;
+			border-left: 6px solid #EAF1FF;
+			border-right: 6px solid #EAF1FF;
+			border-bottom: 6px solid #EAF1FF;
+			border-top: 6px solid #2450AD;
+			border-radius: 100%
+		}
+
+		.userInput {
+			display: var(--user-input-visibility);
+		}
+
+		@-webkit-keyframes rotation {
+			from{
+				-webkit-transform: rotate(0deg)
+			}
+			to{
+				-webkit-transform: rotate(359deg)
+			}
+		}
+
+		@-moz-keyframes rotation {
+			from{
+				-moz-transform: rotate(0deg)
+			}
+			to{
+				-moz-transform: rotate(359deg)
+			}
+		}
+
+		@-o-keyframes rotation {
+			from{
+				-o-transform: rotate(0deg)
+			}
+			to{
+				-o-transform: rotate(359deg)
+			}
+		}
+
+		@keyframes rotation {
+			from{
+				transform: rotate(0deg)
+			}
+			to{
+				transform: rotate(359deg)
+			}
+		}
+
+		#networkTable {
+			margin-bottom: 20px;
+			width: 100%;
+			/*text-align: center;*/
+		}
+
+		#networkTable div:hover{
+			background-color: #ecf0f1;
+		}
+
+		#globalControl {
+			margin: 10px;
+		}
+
+		#enableWifi {
+			margin-left: 20px;
+		}
+
+		.signal-on {
+			color: #0275d8;
+		}
+
+		.signal-off {
+			opacity: 0.4;
+		}
+
+		.action-button {
+			cursor: pointer;
+		}
+
+		.action-button:hover {
+			color: #f39c12;
+		}
+
+		iron-icon[id^=moveUp] {
+			-webkit-transform: rotate(180deg);
+		    -moz-transform: rotate(180deg);
+		    -o-transform: rotate(180deg);
+		    -ms-transform: rotate(180deg);
+		    transform: rotate(180deg);
+		}
+
+		#wifi-message {
+			color: red;
+		}
+
+		#newWifiDlg {
+			min-width: 525px;
+		}
+
+	</style>
+
+	<template>
+
+		<!-- modal to add a new network -->
+		<bootstrap-modal id="newWifiDlg" title="New WiFi Network" modal>
+			<modal-body>
+				<form id="wifi-form">
+					<fieldset>
+						<div class="form-group row">
+							<!-- Detected networks -->
+							<label for="wifi-select" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Detected Networks</label>
+							<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+								<select class="form-control c-select" id="wifi-select" autocomplete="off" on-change="selectSsid" selected=0>
+									<!-- optional message on menu -->
+									<template is="dom-if" if="{{wifiScanMsgEn}}">
+										<option value="" selected>{{wifiScanMsg}}</option>
+									</template>
+									<!-- list out the wifi networks -->
+									<template is="dom-repeat" items="{{networks}}">
+										<option value="{{index}}">{{item.ssid}}</option>
+									</template>
+								</select>
+							</div>
+							<!-- Scan Button -->
+							<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+								<button id="wifi-scan-btn" type="button" class="btn btn-block btn-primary" on-click="scanWifiNetwork">
+									<iron-icon icon="icons:refresh"></iron-icon>
+								</button>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- ssid -->
+							<label for="wifi-ssid" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Wi-Fi Network (SSID)</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="wifi-ssid" autocomplete="off" value="{{networkSsid::input}}"/>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- encryption select -->
+							<label for="wifi-encryption" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Security</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<select class="form-control c-select" id="wifi-encryption" autocomplete="off" value="{{networkAuth::input}}">
+									<option value="none" selected>None</option>
+									<option value="wep">WEP</option>
+									<option value="psk">WPA</option>
+									<option value="psk2">WPA2</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- password -->
+							<label for="wifi-key" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Wi-Fi Password</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type$="[[_computeShowPassword(showPassword)]]" class="form-control" id="wifi-key" autocomplete="off" value="{{networkPassword::input}}"/>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- show password -->
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+								<input type="checkbox" id="showPassword" checked="{{showPassword::change}}" autocomplete="off" />&nbsp;<label for="showPassword">Show Password</label>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+								<div id="wifi-message">{{wifiMessage}}</div>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+			</modal-body>
+			<modal-footer>
+				<bootstrap-button id="wifi-config-button" on-click="addNetwork" color-scheme="success">Add Network</bootstrap-button>
+				<!-- <div id="configureLoading" class="loading"></div> -->
+			</modal-footer>
+		</bootstrap-modal>
+
+
+
+		<!-- list of configured networks -->
+		<div class="container">
+			<div class="card card-block">
+				<div id="configureLoading" class="loading"></div>
+				<div id="globalControl" class="layout horizontal center">
+					<div class="userInput">Wi-Fi Enabled</div>
+					<!-- lazar@onion.io: TODO: need to figure out a way to give the user the option to disable connecting to STA  -->
+					<input type="checkbox" id="enableWifi" checked="{{enableWifi::change}}" autocomplete="off" class="userInput" disabled/>
+					<div class="flex"></div><!-- space holder -->
+				</div>
+
+				<div id="networkTable" class="list-group layout vertical end-justified userInput">
+					<div class="list-group-item layout horizontal end">
+						<div>SSID</div>
+						<div class="flex"></div><!-- space holder -->
+						<div>Actions</div>
+					</div>
+
+					<template is="dom-repeat" items="{{savedNetworks}}">
+
+						<div class="list-group-item layout horizontal end">
+							<div>
+								<span>
+								<template is="dom-if" if="{{!item.enabled}}">
+									<iron-icon icon="device:signal-wifi-off" class="signal-off"></iron-icon>
+								</template>
+								<template is="dom-if" if="{{item.enabled}}">
+									<iron-icon icon="device:signal-wifi-4-bar" class="signal-on"></iron-icon>
+								</template>
+							</span>
+
+								<span>{{item.ssid}}</span>
+							</div>
+
+							<div class="flex"></div><!-- space holder -->
+
+							<!-- control buttons -->
+							<div>
+								<div class="layout horizontal center">
+									<!-- enable network button - only available if not already enabled -->
+									<template is="dom-if" if="{{!item.enabled}}">
+										<iron-icon id="enableNetwork{{item.ssid}}" icon="icons:check-circle" class="action-button"
+											network="{{item}}" on-click="enableNetwork">
+											</iron-icon>
+										<bootstrap-tooltip for="enableNetwork{{item.ssid}}">Enable</bootstrap-tooltip>
+									</template>
+
+									<!-- move up in priority -->
+									<iron-icon icon="arrow-drop-down-circle" class="action-button"
+										id="moveUp{{item.ssid}}" network="{{item}}" on-click="moveUp"></iron-icon>
+									<bootstrap-tooltip for="moveUp{{item.ssid}}">Move Up</bootstrap-tooltip>
+
+									<!-- move down in priority -->
+									<iron-icon icon="arrow-drop-down-circle" class="action-button"
+										id="moveDown{{item.ssid}}" network="{{item}}" on-click="moveDown"></iron-icon>
+									<bootstrap-tooltip for="moveDown{{item.ssid}}">Move Down</bootstrap-tooltip>
+
+									<!-- remove network -->
+									<iron-icon icon="icons:cancel" class="action-button"
+										id="removeNetwork{{item.ssid}}" network="{{item}}" on-click="removeNetwork"></iron-icon>
+									<bootstrap-tooltip for="removeNetwork{{item.ssid}}">Remove</bootstrap-tooltip>
+
+								</div>
+							</div>
+						</div>
+					</template>
+
+				</div>
+				<bootstrap-button class="userInput" on-click="newWifiNetwork" color-scheme="primary">Add Wi-Fi Network</bootstrap-button>
+			</div>
+		</div>
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			// var this = null;
+
+			var created = function () {
+				// this = this;
+			};
+
+			var ready = function () {
+				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+					this.deviceProvider = deviceProvider;
+					// deviceProvider.callService(null, 'uci', 'get', {
+					// 	config: 'wireless',
+					// 	section: '@wifi-iface[0]'
+					// }, function(err, response){
+					// 	this.currentNetworkSsid = response.values.ApCliSsid;
+					// }.bind(this));
+					// onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+					// 	console.log("DeviceProvider:",deviceProvider);
+					// 	console.log("err:",err);
+					// 	this.deviceProvider = deviceProvider;
+					// 	deviceProvider.getDeviceType('', function(result){
+					// 		console.log(result);
+					// 		this.device = result;
+					// 	}.bind(this));
+					// }.bind(this));
+				}.bind(this));
+			}
+
+			var attached = function () {
+
+				this.networks 	= [];
+				this.networkId	= -1;
+
+				this.hideScanMessage();
+
+				onionConsole.getService('onion-session-provider', function (err, sessionProvider) {
+                    this.sessionProvider = sessionProvider;
+                    // if (this.sessionProvider.isAlive() === true) {
+                    onionConsole.getService('onion-wifi-provider', function (err, wifiProvider) {
+                        this.wifiProvider = wifiProvider;
+					}.bind(this));
+                // };
+
+                }.bind(this));
+
+     //            if (this.sessionProvider.isAlive() === true) {
+     //                onionConsole.getService('onion-wifi-provider', function (err, wifiProvider) {
+     //                    this.wifiProvider = wifiProvider;
+					// });
+     //            };
+     			// this._findEnabledNetwork();
+			};
+
+			var init = function () {
+				this.bInitComplete	= false;
+				this.refreshNetwork();		// get the list of currently configured networks
+				this.scanWifiNetwork();		// scan for available networks
+			};
+
+			// grab the list of configured networks
+			var refreshNetwork = function() {
+				this.onLoading(true);
+
+				this.wifiProvider.getConfiguredNetworkList(null)
+				.then(function(result){
+					this.savedNetworks = result;
+					return this.wifiProvider.checkStaEnabled(null);
+				}.bind(this))
+				.then(function(result){
+					console.log('enabled check result: ', result);
+					this.enableWifi = result;
+					this.onLoading(false);
+				}.bind(this))
+				.catch(function (err) {
+					console.error(err);
+					this.onLoading(false);
+				});
+			}
+
+			// show a message on the modal drop-down
+			var showScanMessage = function (message) {
+				this.set('wifiScanMsgEn', true);
+				this.wifiScanMsg = message;
+			};
+
+			// clear the modal drop-down
+			var hideScanMessage = function () {
+				this.set('wifiScanMsgEn', false);
+				console.log('Hide scan message!');
+			};
+
+			// scan for wifi networks, populate the detected networks array
+			//	this shows up in the modal
+			var scanWifiNetwork = function () {
+				this.showScanMessage('Scanning...');
+				console.log('this.wifiProvider: ', this.wifiProvider);
+
+				this.wifiProvider.wifiScan(null)
+				.then(function (result) {
+					while (this.networks.length > 0) {
+						this.pop('networks');
+					}
+
+					// add newly detected networks to array
+					this.showScanMessage('Select Wi-Fi Network:');
+
+					var detectedNetworks = result.results;
+
+					for (var i = 0; i < detectedNetworks.length; i++) {
+						if (detectedNetworks[i].ssid !== '') {
+							this.push('networks', detectedNetworks[i]);
+						}
+					}
+				}.bind(this), function (result) {
+					console.log(result);
+				}.bind(this));
+			};
+
+			// event trigger when a network is selected from the drop-down
+			//	auto-populates the inputs on the modal
+			var selectSsid = function (event) {
+				this.networkId = event.target.value;
+
+				// find the selected network in the list
+				var selectedNetwork = this.networks[this.networkId];
+				console.log('Selected network: ');
+				console.log(selectedNetwork);
+
+				// find the ssid
+				this.networkSsid = selectedNetwork.ssid;
+				this.networkAuth = selectedNetwork.encryption;
+
+				console.log('Auth: ', this.networkAuth);
+			};
+
+			// function to hide or show the password
+			var _computeShowPassword = function (showPassword) {
+				return showPassword ? 'text' : 'password';
+			};
+
+			// open the add network modal
+			var newWifiNetwork = function () {
+				this.$.newWifiDlg.open();
+			};
+
+			// make device call to add a network
+			var addNetwork = function () {
+			    this.wifiMessage = '';
+
+				// check the inputs to make sure they're ok
+			    var verifyResult = this.wifiProvider.verifyKey(this.networkPassword, this.networkAuth);
+				if (!this.networkSsid || this.networkSsid === '') {
+					verifyResult = 'Please enter an SSID';
+				}
+
+				if (verifyResult === 'OK' && this.sessionProvider.isAlive() === true) {
+            		// setup the network
+                	var wifiSetupPromise = this.wifiProvider.setupWifiNetwork(null,this.networkSsid, this.networkPassword, this.networkAuth);
+
+                	wifiSetupPromise.then(function () {
+                		this.refreshNetwork();		// refresh the list to include this new network
+                		this.$.newWifiDlg.close();	// close the dialogue
+                	}.bind(this), function (err) {
+                		console.error(err);
+                	}).bind(this);
+				} else {
+				    this.wifiMessage = verifyResult;
+				}
+			};
+
+			var removeNetwork = function(e) {
+				var network = e.target.network;
+				console.log('Removing ', network.ssid);
+
+				this.wifiProvider.removeWifiNetwork(null, network.ssid)
+				.then(function () {
+					this.refreshNetwork();		// refresh the list to reflect this delete
+				}.bind(this))
+				.catch(function (err) {
+					this.refreshNetwork();		// refresh the list to reflect this delete
+					console.error(err);
+				}.bind(this));
+			};
+
+			var onLoading = function (bLoading) {
+		    	if (!bLoading) {
+					this.customStyle['--loading-visibility'] = 'none';
+					this.customStyle['--user-input-visibility'] = 'block';
+        			this.updateStyles();
+		    	} else {
+					this.customStyle['--loading-visibility'] = 'block';
+					this.customStyle['--loading-visibility-margin'] = 'auto';
+					this.customStyle['--user-input-visibility'] = 'none';
+        			this.updateStyles();
+				}
+			}
+
+			var enableNetwork = function(e) {
+				var network = e.target.network;
+				this.onLoading(true);
+
+				this.wifiProvider.changeNetworkOrder(null, network.ssid, 'top')
+				.then(function () {
+					this.refreshNetwork();		// refresh the list to reflect this reorder
+				}.bind(this));
+			};
+
+			var moveUp = function(e) {
+				var network = e.target.network;
+				console.log('Move Up: ', network.ssid);
+
+				// check if not already at the top - avoid a device call
+				if ( network.ssid !== this.savedNetworks[0].ssid ) {
+					// move the network UP in the list
+					var wifiChangeOrderPromise = this.wifiProvider.changeNetworkOrder(null, network.ssid, 'up');
+
+					wifiChangeOrderPromise.then(function () {
+						this.refreshNetwork();		// refresh the list to reflect this reorder
+					}.bind(this));
+				}
+			};
+
+			var moveDown = function(e) {
+				var network = e.target.network;
+				console.log('Move Down: ', network.ssid);
+
+				if ( network.ssid !== this.savedNetworks[savedNetworks.length-1].ssid ) {
+					// move the network DOWN in the list
+					var wifiChangeOrderPromise = this.wifiProvider.changeNetworkOrder(null, network.ssid, 'down');
+
+					wifiChangeOrderPromise.then(function () {
+						this.refreshNetwork();		// refresh the list to reflect this reorder
+					}.bind(this));
+				}
+			};
+
+			var enableWifiChanged = function (newVal) {
+
+				// TODO: redo this
+				if (this.bInitComplete) {
+					if (newVal === false) {
+						if (confirm('Are you sure you want to turn off the WiFi?\r\nYou may not be able to access your Omega when the WiFi is off.')) {
+							// disable all networks (and commit the change)
+							this.onLoading(true);
+							var disablePromise = this._disableAllNetworks(true);
+
+							disablePromise.then((function () {
+								this.refreshNetwork();		// refresh the list to reflect this change
+
+							}).bind(this));
+						}else {
+							this.enableWifi = !newVal;
+						}
+					}
+					else {
+						this.deviceProvider.callService(null,'uci', 'set', {
+								config: 'wireless',
+								section: 'sta',
+								values: {
+									ApCliEnable: '1',
+								}
+							}, function (err,result) {
+								console.log('uci set wireless result:', result);
+								if (!err) {
+									this.deviceProvider.callService(null,'uci', 'commit', {
+											config: 'wireless'
+									}, function (err, result) {
+										if (!err) {
+											console.log('Enabled WiFi');
+										} else {
+											console.log('WiFi could not be enabled! Error message: ', err);
+										}
+									});
+								} else {
+									console.log('Unable to edit wireless network settings.');
+								}
+						}.bind(this));
+					}
+				}
+			};
+
+
+			Polymer({
+				is: 'onion-settings-wifi',
+				created: created,
+				attached: attached,
+				ready: ready,
+				init: init,
+
+				onLoading: onLoading,
+
+				showScanMessage: showScanMessage,
+				hideScanMessage: hideScanMessage,
+				newWifiNetwork: newWifiNetwork,
+
+				selectSsid: selectSsid,
+				_computeShowPassword: _computeShowPassword,
+
+				scanWifiNetwork: scanWifiNetwork,
+
+				refreshNetwork: refreshNetwork,
+				enableNetwork: enableNetwork,
+
+				addNetwork: addNetwork,
+				removeNetwork: removeNetwork,
+				moveUp: moveUp,
+				moveDown: moveDown,
+
+				enableWifiChanged: enableWifiChanged,
+
+				properties: {
+					enableWifi: {
+						type: Boolean,
+						notify: true,
+						observer: "enableWifiChanged"
+					},
+					networks: {
+						type: Array,
+						notify: true
+					},
+					savedNetworks: {
+						type: Array,
+						notify: true
+					},
+					networkSsid: {
+						type: String,
+						notify: true
+					},
+					networkAuth: {
+						type: String,
+						notify: true
+					},
+					networkPassword: {
+						type: String,
+						notify: true
+					},
+					showPassword: {
+						notify: true,
+						type: Boolean,
+						value: false
+					},
+					device:{
+						type: String,
+						value: '',
+						notify: true
+		    		},
+		    		currentNetworkSsid:{
+						type: String,
+						value: '',
+						notify: true
+		    		}
+				}
+			});
+		})();
+	</script>
+</dom-module>

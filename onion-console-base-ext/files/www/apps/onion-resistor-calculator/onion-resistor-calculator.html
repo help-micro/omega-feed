@@ -1,0 +1,225 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../elements/onion-app/onion-app.html">
+<link rel="import" href="../../lib/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../elements/bootstrap-styles/bootstrap-styles.html">
+<link rel="import" href="./onion-resistor.html">
+
+<dom-module id="onion-resistor-calculator">
+	<style>
+		:host {
+		    display: block;
+	  	    height: 100%;
+			width: 100%;
+		}
+
+		onion-app-body > div {
+			height: 100%;
+			width: 100%;
+		}
+
+		#container {
+			width: 600px;
+			padding: 30px;
+			border-radius: 5px;
+			background-color: #fff;
+		}
+
+		onion-resistor {
+			margin-bottom: 15px;
+		}
+
+		.c-select {
+			border-radius: 5px;
+		}
+
+		#resistance {
+			width: 100px!important;
+			text-align: right;
+			padding-right: 30px;
+		}
+		#ohm {
+
+		}
+			#ohm:after {
+				content: '\03A9';
+				font-size: 20px;
+				line-height: 38px;
+				margin-left: -25px;
+			}
+	</style>
+
+	<template>
+		<onion-app app-name="Resistor Calculator" toolbar-color="#fff" toolbar-background="#d35400" background="#f2f2f2">
+			<onion-app-toolbar>
+
+			</onion-app-toolbar>
+
+			<onion-app-body page-id="home">
+				<div class="horizontal center-justified layout center">
+					<div id="container">
+						<div class="horizontal center-justified layout">
+							<div class="btn-group" role="group" aria-label="Basic example">
+								<button type="button" class$="{{_computeActiveSwitch(bands, 4)}}" on-tap="_selectBands" data-bands="4">Four-Band</button>
+								<button type="button" class$="{{_computeActiveSwitch(bands, 5)}}" on-tap="_selectBands" data-bands="5">Five-Band</button>
+								<button type="button" class$="{{_computeActiveSwitch(bands, 6)}}" on-tap="_selectBands" data-bands="6">Six-Band</button>
+							</div>
+						</div>
+
+						<div class="horizontal center-justified layout">
+							<onion-resistor resistance="{{resistance}}" tolerance="{{tolerance}}" bands="{{bands}}" tcr="{{tcr}}"></onion-resistor>
+						</div>
+						<div class="horizontal center-justified layout">
+							<input maxlength="7" type="text" class="form-control" value="{{resistanceStr::input}}" on-keyup="_computeResistanceValue" id="resistance" />
+							<div id="ohm"></div>&nbsp;
+							<select class="c-select" value="{{tolerance::input}}">
+								<option value="-1">Tolerance</option>
+								<option value="10">&plusmn;10%</option>
+								<option value="5">&plusmn;5%</option>
+								<option value="2">&plusmn;2%</option>
+								<option value="1">&plusmn;1%</option>
+								<option value="0.5">&plusmn;0.5%</option>
+								<option value="0.25">&plusmn;0.25%</option>
+								<option value="0.1">&plusmn;0.10%</option>
+								<option value="0.05">&plusmn;0.05%</option>
+							</select>&nbsp;
+							<select class="c-select" hidden$="{{_computeRowHidden(bands)}}" value="{{tcr::input}}">
+								<option selected value="-1">TCR</option>
+								<option value="100">100ppm</option>
+								<option value="50">50ppm</option>
+								<option value="15">15ppm</option>
+								<option value="25">25ppm</option>
+								<option value="10">10ppm</option>
+								<option value="5">5ppm</option>
+							</select>
+						</div>
+					</div>
+				</div>
+			</onion-app-body>
+		</onion-app>
+
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			var _computeRowHidden = function (bands) {
+				return !(bands === 6);
+			};
+
+			var _selectBands = function (e) {
+				this.bands = parseInt(e.target.dataset.bands);
+			};
+
+			var _computeActiveSwitch = function (bands, btnData) {
+				var className = 'btn btn-secondary';
+
+				if (bands === btnData) {
+					className += ' active';
+				}
+
+				return className;
+			};
+
+			var _numberToSI = function (number) {
+				var si = [
+					{ value: 1E6,  symbol: 'M' },
+					{ value: 1E3,  symbol: 'k' }
+				], i;
+
+				for (i = 0; i < si.length; i++) {
+					if (number >= si[i].value) {
+						return (number / si[i].value).toFixed(2).replace(/\.?0+$/, '') + si[i].symbol;
+					}
+				}
+
+				return number;
+			};
+
+			var _SIToNumber = function (str) {
+				var si = {
+					M: 1E6,
+					k: 1E3
+				};
+
+				if (!str.length) return 0;
+
+				str = str.replace(/\s/ig, '');
+				var value = str.substring(0, str.length - 1);
+				var symbol = str[str.length - 1];
+
+				if (isNaN(symbol) && si[symbol]) {
+					return parseInt(value) * si[symbol];
+				} else {
+					return parseInt(str);
+				}
+			};
+
+			var _computeResistanceValue = function () {
+				if (this.resistance !== _SIToNumber(this.resistanceStr)) {
+					this.updateResistance = false;
+					this.resistance = _SIToNumber(this.resistanceStr);
+				}
+			};
+
+			var _computeResistanceString = function () {
+				if (this.updateResistance) {
+					this.resistanceStr = _numberToSI(this.resistance);
+				} else {
+					this.updateResistance = true;
+					console.log('false');
+				}
+			};
+
+			Polymer({
+				is: 'onion-resistor-calculator',
+				ready: function () {},
+				behaviors: [Onion.AppBehavior],
+				_computeRowHidden: _computeRowHidden,
+				_selectBands: _selectBands,
+				_computeActiveSwitch: _computeActiveSwitch,
+				_computeResistanceValue: _computeResistanceValue,
+				_computeResistanceString: _computeResistanceString,
+				properties: {
+					apps: {
+						type: Array,
+						value: []
+					},
+					bands: {
+						type: Number,
+						value: 4,
+						notify: true
+					},
+					resistance: {
+						type: Number,
+						value: 0,
+						notify: true,
+						observer: '_computeResistanceString'
+					},
+					tolerance: {
+						type: Number,
+						notify: true,
+						value: -1
+					},
+					tcr: {
+						type: Number,
+						notify: true,
+						value: -1
+					},
+					resistanceStr: {
+						type: String,
+						value: '0',
+						notify: true
+					},
+					updateResistance: {
+						type: Boolean
+					}
+				},
+				listeners: {
+
+				}
+			});
+		})();
+	</script>
+
+</dom-module>

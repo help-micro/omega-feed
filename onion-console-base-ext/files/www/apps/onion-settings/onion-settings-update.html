@@ -1,0 +1,388 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../elements/bootstrap-alert/bootstrap-alert.html">
+
+<dom-module id="onion-settings-update">
+	<style>
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+
+		.card {
+			margin-top: 15px;
+			background-color: #fff;
+		}
+
+		#upgradeButtonContainer {
+			margin-bottom: 15px;
+		}
+
+		.loading{
+			height: 20px;
+			width: 20px;
+			margin-left: 15px; 
+			-webkit-animation: rotation 1s infinite linear;
+			-moz-animation: rotation 1s infinite linear;
+			-o-animation: rotation 1s infinite linear;
+			animation: rotation 1s infinite linear;
+			border-left: 3px solid #EAF1FF;
+			border-right: 3px solid #EAF1FF;
+			border-bottom: 3px solid #EAF1FF;
+			border-top: 3px solid #2450AD;
+			border-radius: 100%
+		}
+
+		@-webkit-keyframes rotation {
+			from{
+				-webkit-transform: rotate(0deg)
+			}
+			to{
+				-webkit-transform: rotate(359deg)
+			}
+		}
+
+		@-moz-keyframes rotation {
+			from{
+				-moz-transform: rotate(0deg)
+			}
+			to{
+				-moz-transform: rotate(359deg)
+			}
+		}
+
+		@-o-keyframes rotation {
+			from{
+				-o-transform: rotate(0deg)
+			}
+			to{
+				-o-transform: rotate(359deg)
+			}
+		}
+
+		@keyframes rotation {
+			from{
+				transform: rotate(0deg)
+			}
+			to{
+				transform: rotate(359deg)
+			}
+		}
+	</style>
+
+	<template>
+
+		<div class="container">
+			<h4>Firmware Upgrade</h4>
+			<div class="card card-block">
+				<bootstrap-alert warning no-close>
+					<h4>Attention!</h4>
+					<p>Firmware upgrade will erase all files outside of the <code>/root</code> and <code>/etc</code> directories. Please backup any custom files before proceeding.</p>
+				</bootstrap-alert>
+
+				<table class="table">
+					<tbody>
+						<tr>
+							<th scope="row">Codename</th>
+							<td>{{name}}</td>
+						</tr>
+						<tr>
+							<th scope="row">Model</th>
+							<td>{{model}}</td>
+						</tr>
+						<tr>
+							<th scope="row">Revision</th>
+							<td>{{modelRev}}</td>
+						</tr>
+						<tr>
+							<th scope="row">Firmware</th>
+							<td>{{currentVersion}}</td>
+						</tr>
+						<tr>
+							<th scope="row">Latest Firmware</th>
+							<td>{{latestVersion}}</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<div class="layout horizontal center" id="upgradeButtonContainer">
+					<button class$="{{_calculateButtonClass(upgradeButtonTheme)}}" on-click="upgradeFirmware" disabled="{{upgradeButtonDisabled}}">{{upgradeButtonLabel}}</button>
+					<div id="upgradeLoading" class="loading" hidden></div>
+				</div>
+
+				<div id="download-progress" hidden>
+					<p>Downloading Firmware:</p>
+					<progress class="progress" value="{{downloadProgress}}" max="100"></progress>
+				</div>
+
+				<div id="upgradeAlerts"></div>
+			</div>
+		</div>
+
+
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			var ready = function () {
+				this.name = 'Ando';
+				this.model = '';
+				this.modelRev = 'R1';
+				this.dataReady = 0;
+				//Add function here to get device type
+				onionConsole.getService('onion-session-provider', function (err, sessionProvider) {
+					this.sessionProvider = sessionProvider;
+					// if (this.sessionProvider.isAlive() === true) {
+						onionConsole.getService('onion-device-settings-provider', (function (err, deviceProvider) {
+							deviceProvider.getDeviceType(null,function(result){
+								console.log(result);
+								if(result === 'Onion Omega'){
+									this.model = result;
+								}else if(result === 'Onion Omega2' || result === 'Onion Omega2+'){
+									this.model = result;
+								}
+							}.bind(this));
+						}).bind(this));	
+                	// }
+				}.bind(this));
+				
+				// if (this.sessionProvider.isAlive() === true) {
+				// 	onionConsole.getService('onion-device-settings-provider', (function (err, deviceProvider) {
+				// 		deviceProvider.getDeviceType(function(result){
+				// 			console.log(result);
+				// 			if(result === 'Onion Omega'){
+				// 				this.model = result;
+				// 			}else if(result === 'Onion Omega2'){
+				// 				this.model = result
+				// 			}
+				// 		}.bind(this));
+				// 	}).bind(this));	
+    //             }			
+			};
+
+
+			var init = function () {
+				this.getFirmwareInfo();
+				this.checkFirmwareInfo();
+			};
+
+			// use ubus to get the firmware info data
+			var getFirmwareInfo = function () {
+				// get the ubus service
+				onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
+					var params = {
+						params: {
+							check: ''
+						}
+					};
+
+					// do ubus oupgrade check
+					ubus.request('onion', 'oupgrade', params, (function (data) {
+						if (data) {
+							var returnCode = data[0];
+							console.log('oupgrade check return code: ', returnCode);
+
+							if (returnCode === 0) {
+								this.data = data[1];
+								this.binName = data[1].image.local;
+
+								// denote that data has be received
+								this.dataReady = 1;
+							} else {
+								console.log('oupgrade check error');
+							}
+						}
+					}).bind(this));
+				}).bind(this));
+			};
+
+			// make sense of the firmware info data
+			var checkFirmwareInfo = function () {
+				this.$.upgradeLoading.hidden = false;
+				var checkDataReadyInterval = setInterval((function () {
+					if (this.dataReady === 1) {
+						// stop the loop after this code
+						this.$.upgradeLoading.hidden = true;
+						clearInterval(checkDataReadyInterval);
+
+						// current omega firmware:
+						//	this.data.device.version
+						//	this.data.device.major
+						//	this.data.device.minor
+						//	this.data.device.revision
+						//	this.data.device.build
+
+						this.data.device.string 	= this.data.device.version + ' (b' + this.data.device.build + ')';
+						this.currentVersion 		= this.data.device.string;
+
+						// latest omega firmware:
+						//	this.data.repo.version
+						//	this.data.repo.major
+						//	this.data.repo.minor
+						//	this.data.repo.revision
+						//	this.data.repo.build
+
+						this.data.repo.string 	= this.data.repo.version + ' (b' + this.data.repo.build + ')';
+						this.latestVersion 		= this.data.repo.string;
+
+						// info on binary file:
+						//	binary name: 	this.data.image.binary
+						//	path on Omega: 	this.data.image.local
+						//	URL (not needed): 	this.data.image.url;
+
+						// info on upgrade:
+						//	this.data.upgrade
+						//		true: 	upgrade required, version numbers do not match
+						// 		false: 	upgrade not required, version numbers match
+						// 	this.data.build_mismatch
+						//		true: 	upgrade possible, version numbers match but build numbers do not
+						// 		false: 	upgrade not required, version numbers AND build numbers match
+						// upgrade table
+						//	case	upgrade 	build_mismatch 	perform upgrade:
+						//	1 		true 		false			yes - version number mismatch
+						//	2 		false 		true			yes, but optional - build number mismatch
+						// 	3		false		false			no  - same version and build numbers
+
+						this.data.upgrade = JSON.parse(this.data.upgrade);
+						this.data.build_mismatch = Boolean(this.data.build_mismatch);
+
+						if (this.data.upgrade) {
+							console.log('show major version upgrade');
+							this.upgradeButtonDisabled = false;
+							this.set('upgradeButtonTheme', 'warning');
+							this.upgradeButtonLabel = 'Upgrade Major Version';
+						} else {
+							if (this.data.build_mismatch) {
+								console.log('show minor version upgrade');
+								this.upgradeButtonDisabled = false;
+								this.set('upgradeButtonTheme', 'success');
+								this.upgradeButtonLabel = 'Upgrade Minor Version';
+							} else {
+								//////////////////////////
+								this.upgradeButtonDisabled = false;
+								console.log('do not upgrade');
+								this.upgradeButtonLabel = 'No Upgrade Required';
+							}
+						}
+					}
+				}).bind(this), 500);
+			};
+
+			// use ubus to initiate the firmware upgrade
+			var upgradeFirmware = function () {
+				this.$.upgradeLoading.hidden = false;
+				this.$['download-progress'].hidden = false;
+				this.upgradeButtonDisabled = true;
+				var fileSize = null;
+
+				onionConsole.getService('onion-ubus-provider', function (err, ubus){
+					ubus.request('onion', 'oupgrade', {
+						params: {
+							check: ''
+						}
+					}, function (data) {
+						fileSize = data[1].image.size;
+					})
+				})
+
+				// get the ubus service
+				onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
+					var checkDownloadInterval = setInterval((function () {
+						ubus.request('file', 'stat', {
+							path: this.binName
+						}, (function (data) {
+							if (data && data.length === 2) {
+								this.downloadProgress = Math.floor(data[1].size / fileSize * 100);
+
+								if (data[1].size >= fileSize) {
+									clearInterval(checkDownloadInterval);
+									this.upgradeButtonDisabled = true;
+									var alertElement = document.createElement('bootstrap-alert');
+									
+									alertElement.setAttribute('info', true);
+									alertElement.setAttribute('no-close', true);
+									Polymer.dom(alertElement).innerHTML = '<p>Firmware upgrade has started! Please be patient, this can take up to 3 minutes. When the Omega has rebooted, the firmware upgrade will be complete.</p><p><strong>Do NOT unplug the Omega during this process.</strong></p>';
+
+									Polymer.dom(this.$.upgradeAlerts).appendChild(alertElement);
+									Polymer.dom.flush();
+								}
+							}
+						}).bind(this));
+					}).bind(this), 1000);
+
+					var params = {
+						set_trigger: 'timer'
+					};
+
+					ubus.request('onion', 'omega-led', params, (function (data) {
+						if (data) {
+							if (data[0] === 0) {
+								var params = {
+									params: {
+										force: ''
+									}
+								};
+
+								// do ubus oupgrade
+								ubus.request('onion', 'oupgrade', params, (function (data) {
+									if (data) {
+										var returnCode = data[0];
+										console.log('oupgrade return code: ', returnCode);
+
+										if (returnCode === 0) {
+											console.log('oupgrade started!');
+										}
+										else {
+											console.log('oupgrade error');
+										}
+									}
+								}).bind(this));
+							}
+						}
+					}).bind(this));
+				}).bind(this));
+			};
+
+			var _calculateButtonClass = function (upgradeButtonTheme) {
+				return 'btn btn-' + upgradeButtonTheme;
+			};
+
+			Polymer({
+				is: 'onion-settings-update',
+				ready: ready,
+				init: init,
+				getFirmwareInfo: getFirmwareInfo,
+				checkFirmwareInfo: checkFirmwareInfo,
+				upgradeFirmware: upgradeFirmware,
+				_calculateButtonClass: _calculateButtonClass,
+				binName: null,
+				properties: {
+					settings: Array,
+					upgradeButtonTheme: {
+						type: String,
+						notify: true,
+						value: 'secondary'
+					},
+					upgradeButtonLabel: {
+						type: String,
+						notify: true,
+						value: 'Checking Update...'
+					},
+					upgradeButtonDisabled: {
+						type: Boolean,
+						notify: true,
+						value: true
+					},
+					downloadProgress: {
+						type: Number,
+						notify: true,
+						value: 0
+					}
+				}
+			});
+        })();
+	</script>
+
+</dom-module>

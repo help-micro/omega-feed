@@ -1,0 +1,24 @@
+#!/usr/bin/python
+
+from __future__ import absolute_import, print_function, unicode_literals
+
+import dbus
+from optparse import OptionParser, make_option
+import json
+import bluezutils
+
+if __name__ == '__main__':
+	address = ""
+	response = { "err": 0, "errMessage": "" }
+	parser = OptionParser()
+	(options, args) = parser.parse_args()
+	if (len(args) > 0):
+		address = args[0]
+	
+	try:
+		device = bluezutils.find_device(address) 
+		device.Pair()
+	except Exception, e:
+		response["err"] = 1
+		response["errMessage"] = str(e)
+	print(json.dumps(response))

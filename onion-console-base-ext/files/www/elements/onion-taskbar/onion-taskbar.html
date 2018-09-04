@@ -1,0 +1,188 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-image/iron-image.html">
+<link rel="import" href="../../lib/iron-icons/iron-icons.html">
+<link rel="import" href="../../lib/iron-icons/device-icons.html">
+<link rel="import" href="../onion-icons/onion-icons.html">
+
+<link rel="import" href="./taskbar-tools.html">
+
+<dom-module id="onion-taskbar">
+	<style>
+		:host * {
+			-webkit-user-select: none;  /* Chrome all / Safari all */
+			-moz-user-select: none;     /* Firefox all */
+			-ms-user-select: none;      /* IE 10+ */
+			user-select: none;          /* Likely future */
+		}
+		
+		:host {
+/* 			display: block; */
+			width: 48px;
+			height: 100%;
+		}
+		:host::content div{
+			height: 100%;
+		}
+		
+		#taskFrame.solid {
+			background-color: black;
+		}
+		
+		#launcher-button {
+			color: white;
+			height: 38px;
+			width: 38px;
+			margin: 8px;
+			cursor: pointer;
+			
+			transition: all 0.2s;
+			-webkit-transition: all 0.2s;
+		}
+		#launcher-button:hover {
+			fill: #5D9CEC;
+		}
+
+		.task-icon {
+			height: 36px;
+			width: 36px;
+			padding-left: 2px;
+			background-color: transparent;
+			border: none;
+			border-left-style: solid;
+			border-left-width: 1px;
+			border-left-color: transparent;
+			margin-right: 7px;
+		}
+		.task-icon > iron-image {
+			height: 100%;
+			width: 100%;
+		}
+		.task-icon.active {
+			border-left-color: white;
+		}
+		.task-icon:hover {
+			border-left-color: #5D9CEC;
+		}
+		
+		#taskIcons {
+			width: 100%;
+			height: auto;
+			overflow-y: auto;
+		}
+		#taskIcons iron-image {
+			cursor: pointer;
+		}
+		#taskIcons::-webkit-scrollbar {
+			display: none;
+		}
+
+		.hidden {
+			display: none;
+		}
+		
+		taskbar-tools {
+			height: auto;
+			margin-bottom: 8px;
+		}
+		
+	</style>
+
+	<template>
+
+		<div id="taskFrame" class$="{{getTaskFrameClass(currentApp)}}">
+		<iron-icon class$="{{getTaskFrameClass(currentApp)}}" icon="onion:cloud-logo" id="launcher-button" on-tap="onLauncher" tour-id="launcher-tour-home-button"></iron-icon>
+
+			<div id="taskIcons" class="flex layout vertical center">
+				<template  is="dom-repeat" items="{{runningApps}}">
+					<template is="dom-if" if="{{item.icon}}">
+						<div class$="{{_isActive(item,currentApp)}}" on-click="launch" >
+							<!-- <template is="dom-if" if$="{{getToolsTheme(currentApp)}}"> -->
+								<iron-image sizing="contain" src$="{{_computeIconUrl(item)}}"></iron-image>
+							<!-- </template> -->
+						</div>
+					</template>
+				</template>
+			</div>
+			<!-- <template is="dom-if" if$="{{getToolsTheme(currentApp)}}"> -->
+				<taskbar-tools class$="{{getTaskFrameClass(currentApp)}}" dark$="{{getToolsTheme(currentApp)}}"></taskbar-tools>
+			<!-- </template> -->
+		</div>
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			var launch = function (e) {
+				var appId = e.model.item;
+				if (appId.id) {
+					onionConsole.launchApp(appId.id);
+				}
+			};
+
+			var _computeIconUrl = function (item) {
+				if (item.path) {
+					return '../../console' + item.path + '/'+ item.id + '/icon.png';
+				} else {
+					return '../../console/apps/' + item.id + '/icon.png';
+				}
+			};
+
+			var _isActive = function(item, currentApp){
+				if (item.id === currentApp){
+					return "task-icon active";
+				}else{
+					return "task-icon";
+				}
+			}
+			
+			var getTaskFrameClass = function(currentApp){
+				var baseClass = 'layout vertical center';
+				var hiddenClass = 'hidden';
+				if (currentApp === 'onion-login' || currentApp === ''){
+					return hiddenClass;
+				}else if(currentApp === 'onion-launcher'){
+					return baseClass;
+				}else{
+					return baseClass + " solid";
+				}
+			}
+			
+			var getToolsTheme = function(currentApp){
+				var baseClass = 'layout vertical center';
+				if (currentApp === 'onion-launcher' || currentApp === ''){
+					return false;
+				}else{
+					return true;
+				}
+			}
+
+			var onLauncher = function(e) {
+				onionConsole.launchApp('onion-launcher');
+			}
+
+			Polymer({
+				is: 'onion-taskbar',
+				launch: launch,
+				_isActive: _isActive,
+				getTaskFrameClass: getTaskFrameClass,
+				_computeIconUrl: _computeIconUrl,
+				getToolsTheme: getToolsTheme,
+				onLauncher: onLauncher,
+				properties: {
+					runningApps: {
+						type: Array,
+						notify: true,
+						value: []
+					},
+					currentApp: {
+						type: String,
+						notify: true,
+						value: 'onion-settings',
+					}
+				},
+			});
+		})();
+	</script>
+
+</dom-module>

@@ -1,0 +1,26 @@
+#!/usr/bin/python
+
+import dbus
+import bluezutils
+from optparse import OptionParser, make_option
+import json
+
+ADAPTER_IFACE = "org.bluez.Adapter1"
+address = ""
+parser = OptionParser()
+(options, args) = parser.parse_args()
+if (len(args) > 0):
+	address = args[0]
+
+bus = dbus.SystemBus()
+response = {"err": 0, "errMessage": ""}
+
+try:
+	adapter_path = bluezutils.find_adapter().object_path
+	adapter = dbus.Interface(bus.get_object("org.bluez", adapter_path), "org.bluez.Adapter1")
+	device = bluezutils.find_device(address) 
+	adapter.RemoveDevice(device)
+except Exception, e:
+	response["err"] = 1
+	response["errMessage"] = str(e)
+print(json.dumps(response))

@@ -1,0 +1,101 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-ajax/iron-ajax.html">
+
+<dom-module id="onion-ubus-provider">
+	<template>
+		<iron-ajax id="ajax" url="{{serverUrl}}" method="POST" content-type="application/json" on-response="_handelResponse" handle-as="json" loading="{{loading}}"></iron-ajax> 
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			var self = null;
+
+			var created = function () {
+				self = this;
+			};
+
+			var pendingRequests = {};
+			var requestCounter = 1;
+
+			var request = function (pkg, fn, params, callback) {
+				var requestId = requestCounter++;
+
+				pendingRequests[requestId] = {};
+				pendingRequests[requestId].callback = callback || function () {};
+
+				var promise = new Promise(function (resolve, reject) {
+					pendingRequests[requestId].resolve = resolve;
+					pendingRequests[requestId].reject = reject;
+				});
+
+				var body = {
+					jsonrpc: '2.0',
+					id: requestId,
+					method: 'call',
+					params: [self.token, pkg, fn, params]
+				};
+				
+				self.$.ajax.body = JSON.stringify(body); 
+				self.$.ajax.generateRequest();
+
+				return promise;
+			};
+
+			var _handelResponse = function (request) {
+				var response = request.detail.response;
+
+                if (response !== null) {
+ 				    if ('error' in response) {
+ 				    	if (response['error'].code === -32002) {
+ 				    		onionConsole.getService('onion-session-provider', function (err, sessionProvider) {
+ 				    			sessionProvider.logout();
+ 				    		});
+ 				    	}
+
+ 				    	pendingRequests[response.id].reject(response.error);
+					    pendingRequests[response.id].callback({error: response.error});
+				    } else {
+				    	pendingRequests[response.id].resolve(response.result);
+					    pendingRequests[response.id].callback(response.result);
+				    }
+
+				    delete pendingRequests[response.id];
+				} else {
+				    self.isAlive = false;
+					self.token = '00000000000000000000000000000000';
+				}
+			};
+
+
+			Polymer({
+				is: 'onion-ubus-provider',
+				created: created,
+	            properties: {
+	            	token: {
+	            		type: String,
+	            		value: '00000000000000000000000000000000'
+	            	},
+	            	serverUrl: {
+	            		type: String,
+	            		value: window.location.origin + '/ubus'
+	            		// value: "/ubus"
+
+	            	},
+					isAlive: {
+					    type: Boolean,
+						value: false
+					},
+					loading: {
+						type: Boolean,
+						value: false,
+						notify: true
+					}
+	            },
+	            request: request,
+	            _handelResponse: _handelResponse
+			});
+        })();
+	</script>
+</dom-module>

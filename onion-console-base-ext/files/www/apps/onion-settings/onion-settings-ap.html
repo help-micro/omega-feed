@@ -1,0 +1,326 @@
+<link rel="import" href="../../lib/polymer/polymer.html">
+<link rel="import" href="../../lib/iron-icons/iron-icons.html">
+
+<dom-module id="onion-settings-ap">
+	<style>
+		body {
+			background-color: #f2f2f2;
+			padding-top: 4rem;
+			padding-bottom: 4rem;
+		}
+
+		.main {
+			background-color: #fff;
+			border-color: transparent;
+			padding: 4rem 2rem;
+			margin-bottom: 0;
+		}
+
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+
+		.card {
+			margin-top: 15px;
+			background-color: #fff;
+		}
+			.card form > .form-group:last-child {
+				margin-bottom: 0;
+			}
+
+		.loading{
+			height: 20px;
+			width: 20px;
+			margin-left: 15px;
+			-webkit-animation: rotation 1s infinite linear;
+			-moz-animation: rotation 1s infinite linear;
+			-o-animation: rotation 1s infinite linear;
+			animation: rotation 1s infinite linear;
+			border-left: 3px solid #EAF1FF;
+			border-right: 3px solid #EAF1FF;
+			border-bottom: 3px solid #EAF1FF;
+			border-top: 3px solid #2450AD;
+			border-radius: 100%
+		}
+
+		@-webkit-keyframes rotation {
+			from{
+				-webkit-transform: rotate(0deg)
+			}
+			to{
+				-webkit-transform: rotate(359deg)
+			}
+		}
+
+		@-moz-keyframes rotation {
+			from{
+				-moz-transform: rotate(0deg)
+			}
+			to{
+				-moz-transform: rotate(359deg)
+			}
+		}
+
+		@-o-keyframes rotation {
+			from{
+				-o-transform: rotate(0deg)
+			}
+			to{
+				-o-transform: rotate(359deg)
+			}
+		}
+
+		@keyframes rotation {
+			from{
+				transform: rotate(0deg)
+			}
+			to{
+				transform: rotate(359deg)
+			}
+		}
+	</style>
+
+	<template>
+		<div class="container">
+			<h4 class="card-title">Wi-Fi Access Point Setup</h4>
+			<div class="card card-block">
+				<form id="ap-form">
+					<!-- removed enabled checkbox for now -- cannot disable ap anyway -->
+					<!-- <div class="form-group row"> -->
+						<!-- enabled -->
+						<!-- <label for="ap-enabled" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Enable AP Mode</label> -->
+						<!-- <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"> -->
+							<!-- <div class="checkbox"> -->
+								<!-- <label><input type="checkbox" id="enableAP" checked="{{enableAP::change}}" autocomplete="off" /></label> -->
+							<!-- </div> -->
+						<!-- </div> -->
+					<!-- </div> -->
+
+					<fieldset disabled="{{!enableAP}}">
+						<div class="form-group row">
+							<!-- ssid -->
+							<label for="ap-ssid" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">AP Network (SSID)</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="apSsid" autocomplete="off" value="{{apSsid::input}}" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- encryption select -->
+							<label for="ap-encryption" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Security</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<select class="form-control c-select" id="apEncryption" autocomplete="off" value="{{apAuth::input}}">
+									<option value="none" selected>None</option>
+									<option value="wep">WEP</option>
+									<option value="psk">WPA</option>
+									<option value="psk2">WPA2</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- password -->
+							<label for="ap-key" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">AP Password</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type$="[[_computeShowPassword(showPassword)]]" class="form-control" id="apKey" autocomplete="off" value="{{apPassword::input}}" />
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- show password -->
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+								<input type="checkbox" id="showPasswordAp" checked="{{showPassword::change}}" autocomplete="off" />&nbsp;<label for="showPassword">Show Password</label>
+							</div>
+						</div>
+						<div class="form-group row">
+							<!-- ip address -->
+							<label for="ap-key" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">IP Address</label>
+							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+								<input type="text" class="form-control" id="apIp" autocomplete="off" value="{{apIp::input}}" />
+							</div>
+						</div>
+					</fieldset>
+
+					<div class="row">
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+							<div id="ap-message">{{apMessage}}</div>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<!-- start ap-config -->
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+							<div class="layout horizontal center">
+								<button id="ap-config-button" type="button" class="btn btn-success" on-click="setupAP">Configure AP</button>
+								<div id="configureLoading" class="loading" hidden></div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</template>
+
+	<script>
+		'use strict';
+
+		(function () {
+			// var this = null;
+
+			var created = function () {
+				// this = this;
+			};
+
+			var ready = function () {
+				onionConsole.getService('onion-session-provider', function (err, sessionProvider) {
+                    this.sessionProvider = sessionProvider;
+	                // if (this.sessionProvider.isAlive() === true) {
+	                    onionConsole.getService('onion-wifi-provider', function (err, wifiProvider) {
+	                        this.wifiProvider = wifiProvider;
+						}.bind(this));
+	                // };
+                }.bind(this));
+
+     //            if (this.sessionProvider.isAlive() === true) {
+     //                onionConsole.getService('onion-wifi-provider', function (err, wifiProvider) {
+     //                    this.wifiProvider = wifiProvider;
+					// });
+     //            };
+
+			};
+
+			var init = function () {
+				this.refreshNetworkInfo();
+			};
+
+			var refreshNetworkInfo = function () {
+				var promise = new Promise(function (resolve, reject) {
+					this.setLoading(true);
+
+					var getApNetworkInfoPromise 	= this.wifiProvider.getApNetworkInfo(null);
+					var getApStaticIpAddrPromise 	= this.wifiProvider.getApStaticIpAddr();
+
+					Promise.all([getApNetworkInfoPromise, getApStaticIpAddrPromise])
+					.then(function(values) {
+						// handle data from get network info promise
+						var data = values[0];
+						console.log('AP settings: ', data);
+						this.set('apSsid', data.ssid);
+						this.set('apAuth', data.encryption);
+						this.set('apPassword', data.password);
+						// handle data from IP addr promise
+						this.set('apIp', values[1]);
+						this.originalIp = values[1];
+
+						// disable the loading
+						this.setLoading(false);
+						// resolve the promise
+						resolve();
+					}.bind(this));
+				}.bind(this));
+
+				return promise;
+			};
+
+			var setLoading = function (bLoading) {
+				if (bLoading) {
+					this.$.configureLoading.hidden = false;
+			    	this.$['ap-config-button'].disabled = true;
+				} else {
+					this.$.configureLoading.hidden = true;
+		    		this.$['ap-config-button'].disabled = false;
+				}
+			};
+
+			var onAppIcon = function (e) {
+				this.onionConsole.launchApp(e.target);
+			};
+
+			var setupAP = function () {
+				this.setLoading(true);
+			    this.apMessage = '';
+
+			    var verifyResult = this.wifiProvider.verifyKey(this.apPassword, this.apAuth);
+				if (!this.apSsid || this.apSsid === '') {
+					verifyResult = 'Please enter an SSID';
+				}
+
+				if (verifyResult === 'OK' && this.sessionProvider.isAlive() === true) {
+	        		// update the AP settings
+					var newIp = (this.apIp === this.originalIp ? null : this.apIp);
+		        	this.wifiProvider.setupAp(null, this.enableAP, this.apSsid, this.apPassword, this.apAuth)
+					.then(function () {
+						console.log('setupAp called, refreshing network info');
+						return (this.refreshNetworkInfo());
+					}.bind(this))
+					.then(function () {
+						console.log('refresh networks complete: newIp value: ', newIp);
+						if (newIp !== null) {
+							this.setLoading(true);
+							this.set('apIp', newIp);
+							console.log('setting new static IP');
+							return (this.wifiProvider.setWlanStaticIp(null, newIp));
+						} else {
+							return (null);
+						}
+					}.bind(this))
+					.then(function () {
+						console.log('refreshing network info again');
+						this.refreshNetworkInfo();
+					}.bind(this))
+		        	.catch(function (err) {
+		        		console.error(err);
+		        	}.bind(this));
+				} else {
+				    this.apMessage = verifyResult;
+				}
+			};
+
+			var _computeShowPassword = function (showPassword) {
+				return showPassword ? 'text' : 'password';
+			};
+
+			Polymer({
+				is: 'onion-settings-ap',
+				created: created,
+				ready: ready,
+				init: init,
+				setLoading: setLoading,
+				refreshNetworkInfo: refreshNetworkInfo,
+				setupAP: setupAP,
+				_computeShowPassword: _computeShowPassword,
+				properties: {
+					enableAP: {
+						type: Boolean,
+						notify: true
+					},
+					apSsid: {
+						type: String,
+						notify: true
+					},
+					apAuth: {
+						type: String,
+						notify: true
+					},
+					apPassword: {
+						type: String,
+						notify: true,
+						value: ''
+					},
+					apIp: {
+						type: String,
+						notify: true
+					},
+					originalIp: {
+						type: String,
+						notify: true,
+						value: ''
+					},
+					showPassword: {
+		    			notify: true,
+				        type: Boolean,
+				        value: false
+		    		}
+				}
+			});
+		})();
+	</script>
+</dom-module>
