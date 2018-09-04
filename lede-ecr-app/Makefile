@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.45
+PKG_VERSION:=1.0.46
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
@@ -11,7 +11,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/help-micro/lede-ecr-app.git
+PKG_SOURCE_URL:=https://github.com/artemkramov/lede-ecr-app.git
 PKG_SOURCE_VERSION:=$(PKG_REV)
 
 include $(INCLUDE_DIR)/package.mk
