@@ -29,7 +29,7 @@ Application to forward requests from external port to ECR
 endef
 
 define Build/Compile
-        $(CP) ./files/Makefile $(PKG_BUILD_DIR)/makefile
+        $(CP) ./files/Makefile $(PKG_BUILD_DIR)/Makefile
 endef
 
 define Package/lede-ecr-app/conffiles
