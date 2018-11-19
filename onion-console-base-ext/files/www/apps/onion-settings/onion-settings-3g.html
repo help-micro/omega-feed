@@ -17,7 +17,7 @@
 		}
 
 		.container {
-			width: 600px;
+			/*width: 600px;*/
 			margin: 0 auto;
 		}
 
@@ -98,7 +98,15 @@
 			border-top-left-radius: .25rem;
 			border-top-right-radius: .25rem;
 		}
-		
+		@media screen and (max-width: 543px) {
+			.container.onion-settings-3g {
+				padding-left: 0;
+				padding-right: 0;
+			}
+			h4.onion-settings-3g {
+				padding-left: 0.945rem;
+			}
+		}
 	</style>
 
 	<template>
@@ -123,14 +131,14 @@
 							<label for="modem-device" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Device</label>
 							<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
 								<div class="row">
-									<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+									<div class="col-lg-9 col-md-9 col-sm-12">
 										<select class="form-control c-select" id="modem-device" autocomplete="off" value="{{modemDevice::input}}">
 											<template is="dom-repeat" items="{{devices}}" as="device" >
 												<option value$={{getDevicePath(device)}} selected$="{{isDeviceSelected(device)}}">{{device}}</option>
 											  </template>
 										</select>
 									</div>
-									<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+									<div class="col-lg-3 col-md-3 col-sm-12">
 										<button type="button" class="btn btn-default" on-click="refreshDeviceList"><iron-icon icon="icons:refresh"></iron-icon></button>
 									</div>
 								</div>
@@ -201,7 +209,7 @@
 					</div>
 
 					<div class="form-group row">
-						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 col-lg-offset-4 col-md-offset-4 col-sm-offset-4 col-xs-offset-4">
+						<div class="col-sm-12">
 							<div class="layout horizontal center">
 								<button id="modem-config-button" type="button" class="btn btn-success" on-click="setupModem">Configure modem</button>
 								<div id="configureLoadingModem" class="loading" hidden></div>

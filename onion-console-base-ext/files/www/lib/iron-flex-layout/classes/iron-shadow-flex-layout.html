@@ -298,5 +298,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     bottom: 0;
     left: 0;
   }
+  
+  @media screen and (max-width: 543px) {
+	html /deep/ .layout.horizontal.onion-settings {
+		display: block !important;
+	}
+	#side-bar.onion-settings {
+		height: auto;
+	}
+	iron-pages.onion-settings {
+		padding: 0;
+		margin-top: 10px;
+	}
+ }
 
 </style>

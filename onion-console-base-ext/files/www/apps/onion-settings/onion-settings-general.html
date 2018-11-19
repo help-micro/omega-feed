@@ -4,7 +4,7 @@
 <dom-module id="onion-settings-general">
 	<style>
 		.container {
-			width: 600px;
+			/*width: 600px;*/
 			margin: 0 auto;
 		}
 
@@ -103,7 +103,9 @@
 			border-radius: 100%;
 			display: inline-block;
 		}
-		
+		@media screen and (max-width: 543px) {
+			
+		}
 	</style>
 
 	<template>
@@ -166,7 +168,7 @@
 
 				<div class="form-group row">
 					<!-- save settings -->
-					<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+					<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
 						<button id="wifi-config-button" type="button" class="btn btn-success btn-block" on-tap="saveSettings">Save Settings</button>
 					</div>
 				</div>

@@ -16,7 +16,7 @@
 		}
 
 		.container {
-			width: 600px;
+			/*width: 600px;*/
 			margin: 0 auto;
 		}
 
@@ -133,6 +133,19 @@
 
 		#newWifiDlg {
 			min-width: 525px;
+		}
+		
+		@media screen and (max-width: 543px) {
+			.container.onion-settings-wifi {
+				padding-left: 0;
+				padding-right: 0;
+			}
+			.list-group-item {
+				display: block !important;
+			}
+			.list-group-item:first-child {
+				display: flex !important;
+			}
 		}
 
 	</style>

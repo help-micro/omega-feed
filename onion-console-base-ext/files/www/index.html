@@ -8,7 +8,12 @@
         <meta name="author" content="Onion Corporation" />
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 		<link rel="icon" type="image/png" href="./images/icon.png">
-
+		<script type="text/javascript">
+			// First we get the viewport height and we multiple it by 1% to get a value for a vh unit
+            let vh = window.innerHeight * 0.01;
+            // Then we set the value in the --vh custom property to the root of the document
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+		</script>
 		<script src="./lib/webcomponentsjs/webcomponents.js"></script>
 		<link rel="import" href="./elements/onion-styles/onion-styles.html">
 		<script src="./lib/bluebird/bluebird.min.js"></script>

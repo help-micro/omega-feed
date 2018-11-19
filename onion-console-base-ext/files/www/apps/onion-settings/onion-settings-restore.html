@@ -5,7 +5,7 @@
 <dom-module id="onion-settings-restore">
 	<style>
 		.container {
-			width: 600px;
+			/*width: 600px;*/
 			margin: 0 auto;
 		}
 
@@ -66,6 +66,15 @@
 			}
 			to{
 				transform: rotate(359deg)
+			}
+		}
+		@media screen and (max-width: 543px) {
+			.container.onion-settings-restore {
+				padding-left: 0;
+				padding-right: 0;
+			}
+			h4.onion-settings-restore {
+				padding-left: 0.945rem;
 			}
 		}
 	</style>
