@@ -6,6 +6,9 @@ STOP=151
 start() {
         /usr/share/lede-ecr-util/checkWanStatus &
         # commands to launch application
+		
+		# trigger udev
+		/sbin/udevadm trigger &
 }
 
 boot() {

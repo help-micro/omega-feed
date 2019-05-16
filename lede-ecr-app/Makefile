@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.63
+PKG_VERSION:=1.0.64
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
@@ -48,6 +48,7 @@ define Package/lede-ecr-app/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/init.d/ecr $(1)/etc/init.d/ecr
 	$(INSTALL_BIN) ./files/checkWanStatus.sh $(1)/usr/share/lede-ecr-util/checkWanStatus
 	$(INSTALL_BIN) ./files/wanStatus $(1)/etc/init.d/wanStatus
+	$(INSTALL_BIN) ./files/udev $(1)/etc/init.d/udev
 	$(INSTALL_BIN) ./files/uci-defaults/50-bluetooth-set-name $(1)/etc/uci-defaults/50-bluetooth-set-name
 	$(INSTALL_BIN) ./files/hotplug.d/20-rndis $(1)/etc/hotplug.d/net/20-rndis
 	$(INSTALL_DATA) ./files/bluetooth.conf $(1)/etc/dbus-1/system.d/bluetooth.conf
