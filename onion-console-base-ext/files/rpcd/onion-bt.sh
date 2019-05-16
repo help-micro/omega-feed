@@ -65,7 +65,7 @@ case "$1" in
 				echo '{"success": true}'
 			;;
 			getLeases)
-				ip="192.168.8.100"
+				ip="192.168.9.100"
 				record=$(cat /proc/net/arp | grep "$ip")
 				delimiter=' '
 				device='-'
