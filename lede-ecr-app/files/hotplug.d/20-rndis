@@ -4,7 +4,7 @@ if [ "${INTERFACE}" = "usb0" ];
     then if [ "${ACTION}" = "add" ];
         then
                 echo "" > /tmp/dhcp.leases
-                /etc/init.d/dnsmasq restart &
+#                /etc/init.d/dnsmasq restart &
          fi
 fi
 
