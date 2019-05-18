@@ -1,0 +1,67 @@
+#!/bin/bash
+
+existing_size=0
+current_iface="$1"
+path="/sys/bus/usb/devices/"
+idVendorECR="04cc"
+idProductECR="0011"
+is_reset=0
+current_id=""
+
+if ! [[ "$current_iface" =~ "usb" ]]; then
+        exit
+fi
+
+# logger -t HOTPLUG "Current ID: $current_id"
+
+for directory in $path*; do
+        subdirectory=$directory"/net"
+
+        if [ -d "$subdirectory" ]; then
+                id=$(echo "$(basename "$directory")" | cut -d ":" -f 1)
+                for iface in $subdirectory/*; do
+                        ifacename=$(echo "$(basename "$iface")")
+                        if [ "$ifacename" = "$current_iface" ]; then
+                                idVendor=$(< $path$id"/idVendor")
+                                idProduct=$(< $path$id"/idProduct")
+                                if [ "$idVendor" = "$idVendorECR" ] && [ "$idProduct" = "$idProductECR" ]; then
+                                        current_id=$(echo "$id")
+                                        is_reset=1
+                                fi
+                        fi
+                done
+        fi
+done
+
+if [ $is_reset -eq 1 ]; then
+        for directory in $path*; do
+                subdirectory=$directory"/net"
+
+                if [ -d "$subdirectory" ]; then
+                        id=$(echo "$(basename "$directory")" | cut -d ":" -f 1)
+
+                        # unbind usb device
+                        echo -n "$id" > /sys/bus/usb/drivers/usb/unbind
+
+                        if [ "$current_id" != "$id" ]; then
+                                existing[$existing_size]=$(echo $id)
+                                existing_size=$((existing_size+1))
+                        fi
+
+                fi
+        done
+
+        # Bind current device
+        echo -n "$current_id" > /sys/bus/usb/drivers/usb/bind
+
+        # Bind all another devices
+        for id in "${existing[@]}"
+        do
+                if [ "$current_id" != "$id" ]; then
+                        echo -n "$id" > /sys/bus/usb/drivers/usb/bind
+                fi
+        done
+
+fi
+
+exit

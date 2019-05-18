@@ -7,3 +7,7 @@ if [ "${INTERFACE}" = "usb0" ];
                 /etc/init.d/dnsmasq restart &
          fi
 fi
+
+if [ "$ACTION" = "add" ] && [ "$INTERFACE" != "usb0" ]; then
+       /bin/bash /root/usb-hotplug "$INTERFACE"
+fi
