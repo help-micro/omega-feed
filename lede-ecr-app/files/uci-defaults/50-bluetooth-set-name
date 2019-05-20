@@ -15,3 +15,5 @@ echo Name=Omega-$(cat /sys/class/net/eth0/address|awk -F ":" '{print $5""$6}'| t
 /sbin/uci set uhttpd.main.interpreter='.py=/usr/bin/python'
 /sbin/uci commit
 /etc/init.d/firewall restart
+
+chown -R ftp_user /home/ftp_user/storage

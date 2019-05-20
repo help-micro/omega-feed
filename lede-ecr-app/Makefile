@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.68
+PKG_VERSION:=1.0.69
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
@@ -44,6 +44,8 @@ define Package/lede-ecr-app/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/net
 	$(INSTALL_DIR) $(1)/etc/bluetooth
+	$(INSTALL_DIR) $(1)/home/ftp_user
+	$(INSTALL_DIR) $(1)/home/ftp_user/storage
 	$(INSTALL_DIR) $(1)/etc/dbus-1/system.d/
 	$(INSTALL_DIR) $(1)/root
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/init.d/ecr $(1)/etc/init.d/ecr
