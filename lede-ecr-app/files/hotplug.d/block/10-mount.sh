@@ -49,7 +49,7 @@ set_fstab(){
 			uci set fstab.@mount[$n].enabled=1
 			uci set fstab.@mount[$n].device="/dev/$device"
 			uci set fstab.@mount[$n].uuid="${get_uuid}"
-			uci set fstab.@mount[$n].target="/mnt/$device"
+			uci set fstab.@mount[$n].target="/home/ftp_user/storage"
 			uci set fstab.@mount[$n].fstype="$my_fstype"
 
 			case "$my_fstype" in
@@ -155,7 +155,7 @@ if [ `basename $blkdev` != "block" ]; then
 					logger -t 'fstab' "/dev/$device is a Logic Disk or has not supported filesystem "
 					return 0
 					}
-						( mkdir -p /mnt/$device && chmod 777 /mnt/$device && mount /dev/$device /mnt/$device ) 2>&1 | tee /proc/self/fd/2 | logger -t 'fstab'
+						( mkdir -p /home/ftp_user/storage && chmod 777 /home/ftp_user/storage && mount /dev/$device /home/ftp_user/storage ) 2>&1 | tee /proc/self/fd/2 | logger -t 'fstab'
 					;;
 				esac
 			}
