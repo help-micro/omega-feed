@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.69
+PKG_VERSION:=1.0.70
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
@@ -43,17 +43,23 @@ define Package/lede-ecr-app/install
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/etc/hotplug.d
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/net
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/block
 	$(INSTALL_DIR) $(1)/etc/bluetooth
 	$(INSTALL_DIR) $(1)/home/ftp_user
 	$(INSTALL_DIR) $(1)/home/ftp_user/storage
 	$(INSTALL_DIR) $(1)/etc/dbus-1/system.d/
 	$(INSTALL_DIR) $(1)/root
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_DIR) $(1)/lib/functions
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/init.d/ecr $(1)/etc/init.d/ecr
 	$(INSTALL_BIN) ./files/checkWanStatus.sh $(1)/usr/share/lede-ecr-util/checkWanStatus
 	$(INSTALL_BIN) ./files/wanStatus $(1)/etc/init.d/wanStatus
 	$(INSTALL_BIN) ./files/udev $(1)/etc/init.d/udev
 	$(INSTALL_BIN) ./files/uci-defaults/50-bluetooth-set-name $(1)/etc/uci-defaults/50-bluetooth-set-name
 	$(INSTALL_BIN) ./files/hotplug.d/20-rndis $(1)/etc/hotplug.d/net/20-rndis
+	$(INSTALL_BIN) ./files/hotplug.d/block/10-mount.sh $(1)/etc/hotplug.d/block/10-mount
+	$(INSTALL_BIN) ./files/hotplug.d/block/20-swap.sh $(1)/etc/hotplug.d/block/20-swap
+	$(INSTALL_BIN) ./files/hotplug.d/block/block.sh $(1)/lib/functions/block.sh
 	$(INSTALL_BIN) ./files/usb-hotplug $(1)/root/usb-hotplug
 	$(INSTALL_DATA) ./files/bluetooth.conf $(1)/etc/dbus-1/system.d/bluetooth.conf
 	$(CP) -r $(PKG_BUILD_DIR)/ecr-app $(1)/www
