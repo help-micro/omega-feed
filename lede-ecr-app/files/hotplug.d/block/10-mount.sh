@@ -54,13 +54,13 @@ set_fstab(){
 
 			case "$my_fstype" in
 				ext*)
-					uci set fstab.@mount[$n].options="rw";;
+					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 				'ntfs')
-					uci set fstab.@mount[$n].options="noatime";;
+					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 				'exfat')
-					uci set fstab.@mount[$n].options="noatime";;
+					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 				'vfat')
-					uci set fstab.@mount[$n].options="utf8=1,umask=0000,dmask=0000,fmask=0000";;
+					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 			esac
 		fi
 		uci commit fstab
