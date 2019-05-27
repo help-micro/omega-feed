@@ -56,7 +56,7 @@ set_fstab(){
 				ext*)
 					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 				'ntfs')
-					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
+					uci set fstab.@mount[$n].options="rw,sync,uid=1000,gid=1000";;
 				'exfat')
 					uci set fstab.@mount[$n].options="rw,uid=1000,gid=1000";;
 				'vfat')
@@ -120,7 +120,7 @@ if [ `basename $blkdev` != "block" ]; then
 						chmod 777 "$mds_mount_target"
 						case "$mds_mount_fstype" in
 						   'ntfs')
-						   env -i /bin/mount -o "$mds_mount_options" /dev/$device "$mds_mount_target" 2>&1 | tee /proc/self/fd/2 | logger -t 'fstab'
+						   env -i /usr/bin/ntfs-3g -o "$mds_mount_options" /dev/$device "$mds_mount_target" 2>&1 | tee /proc/self/fd/2 | logger -t 'fstab'
 						    ;;
 							*)
 								env -i /bin/mount -t "$mds_mount_fstype" -o "$mds_mount_options" /dev/$device "$mds_mount_target" 2>&1 | tee /proc/self/fd/2 | logger -t 'fstab';;
