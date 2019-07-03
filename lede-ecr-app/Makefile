@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lede-ecr-app
-PKG_VERSION:=1.0.73
+PKG_VERSION:=1.0.74
 PKG_RELEASE:=2
 PKG_REV:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)
@@ -44,6 +44,7 @@ define Package/lede-ecr-app/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/net
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/block
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/usb
 	$(INSTALL_DIR) $(1)/etc/bluetooth
 	$(INSTALL_DIR) $(1)/home/ftp_user
 	$(INSTALL_DIR) $(1)/home/ftp_user/storage
@@ -60,6 +61,7 @@ define Package/lede-ecr-app/install
 	$(INSTALL_BIN) ./files/hotplug.d/block/10-mount.sh $(1)/etc/hotplug.d/block/10-mount
 	$(INSTALL_BIN) ./files/hotplug.d/block/20-swap.sh $(1)/etc/hotplug.d/block/20-swap
 	$(INSTALL_BIN) ./files/hotplug.d/block/block.sh $(1)/lib/functions/block.sh
+	$(INSTALL_BIN) ./files/hotplug.d/usb/30_usb-hid $(1)/etc/hotplug.d/usb/30_usb-hid
 	$(INSTALL_BIN) ./files/usb-hotplug $(1)/root/usb-hotplug
 	$(INSTALL_DATA) ./files/bluetooth.conf $(1)/etc/dbus-1/system.d/bluetooth.conf
 	$(CP) -r $(PKG_BUILD_DIR)/ecr-app $(1)/www

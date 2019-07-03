@@ -1,0 +1,6 @@
+logger -t HOTPLUG "Always $PRODUCT $ACTION"
+if [ "${ACTION}" = "add" ]; then
+        logger -t HOTPLUG "ADD new: $PRODUCT"
+        /usr/bin/node /www/ecr-app/hid.js $PRODUCT
+fi
+
