@@ -57,7 +57,7 @@ define Build/Compile
 endef
 
 define Package/node-usb-detection/install
-	mkdir -p $(1)/usr/lib/node/node-usb-detection/
+	mkdir -p $(1)/usr/lib/node/usb-detection/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/* $(1)/usr/lib/node/
 endef
 
