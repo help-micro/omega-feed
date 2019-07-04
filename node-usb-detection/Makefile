@@ -32,7 +32,7 @@ define Package/node-usb-detection
 	SUBMENU:=Node.js
 	SECTION:=lang
 	CATEGORY:=Languages
-	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp
+	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp +libudev
 	TITLE:=Node.js package to detect USB devices
 	URL:=https://github.com/MadLittleMods/node-usb-detection.git
 endef
