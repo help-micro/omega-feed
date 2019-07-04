@@ -28,17 +28,17 @@ PKG_LICENSE_FILES:=
 include $(INCLUDE_DIR)/package.mk
 
 define Package/node-usb-detection
-  DEPENDS:=+node
-  SUBMENU:=Node.js
-  SECTION:=lang
-  CATEGORY:=Languages
-  DEPENDS:=+libusb-1.0 +hidapi +libstdcpp
-  TITLE:=Node.js package to detect USB devices
-  URL:=https://github.com/MadLittleMods/node-usb-detection.git
+	DEPENDS:=+node
+	SUBMENU:=Node.js
+	SECTION:=lang
+	CATEGORY:=Languages
+	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp
+	TITLE:=Node.js package to detect USB devices
+	URL:=https://github.com/MadLittleMods/node-usb-detection.git
 endef
 
 define Package/node-usb-detection/description
- Node.js package to detect USB devices
+	Node.js package to detect USB devices
 endef
 
 CPU:=$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))
@@ -46,19 +46,19 @@ CPU:=$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))
 EXTRA_CFLAGS+=-I$(STAGING_DIR)/usr/include/libusb-1.0
 
 define Build/Compile
-        git init $(PKG_BUILD_DIR)
-        $(MAKE_VARS) \
-        $(MAKE_FLAGS) \
-        npm_config_arch=$(CONFIG_ARCH) \
-        npm_config_nodedir=$(BUILD_DIR)/node-v$(PKG_NODE_VERSION)/ \
-        npm_config_cache=$(BUILD_DIR)/node-v$(PKG_NODE_VERSION)/npm-cache \
-        PREFIX="$(PKG_INSTALL_DIR)/usr/" \
-        npm install --build-from-source --target_arch=$(CPU) -g $(PKG_BUILD_DIR)
+	git init $(PKG_BUILD_DIR)
+	$(MAKE_VARS) \
+	$(MAKE_FLAGS) \
+	npm_config_arch=$(CONFIG_ARCH) \
+	npm_config_nodedir=$(BUILD_DIR)/node-v$(PKG_NODE_VERSION)/ \
+	npm_config_cache=$(BUILD_DIR)/node-v$(PKG_NODE_VERSION)/npm-cache \
+	PREFIX="$(PKG_INSTALL_DIR)/usr/" \
+	npm install --build-from-source --target_arch=$(CPU) -g $(PKG_BUILD_DIR)
 endef
 
 define Package/node-usb-detection/install
-        mkdir -p $(1)/usr/lib/node/node-usb-detection/
-        $(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/* $(1)/usr/lib/node/
+	mkdir -p $(1)/usr/lib/node/node-usb-detection/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/* $(1)/usr/lib/node/
 endef
 
 $(eval $(call BuildPackage,node-usb-detection))
