@@ -9,13 +9,13 @@ include $(TOPDIR)/rules.mk
 
 PKG_NPM_NAME:=usb-detection
 PKG_NAME:=node-$(PKG_NPM_NAME)
-PKG_VERSION:=1.6.0
+PKG_VERSION:=4.3.0
 PKG_RELEASE:=5
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/nonolith/node-usb.git
+PKG_SOURCE_URL:=https://github.com/MadLittleMods/node-usb-detection.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=1bec8fba26e6cb3c81a0a548bf71b48b6a1570c6
+PKG_SOURCE_VERSION:=49655a5076d2e5416c63ef5c2851beca4ed84c26
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 
 PKG_BUILD_DEPENDS:=node/host
@@ -34,7 +34,7 @@ define Package/node-usb-detection
 	CATEGORY:=Languages
 	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp +libudev
 	TITLE:=Node.js package to detect USB devices
-	URL:=https://github.com/nonolith/node-usb.git
+	URL:=https://github.com/MadLittleMods/node-usb-detection.git
 endef
 
 define Package/node-usb-detection/description
@@ -57,7 +57,7 @@ define Build/Compile
 endef
 
 define Package/node-usb-detection/install
-	mkdir -p $(1)/usr/lib/node/node-usb/
+	mkdir -p $(1)/usr/lib/node/node-usb-detection/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/* $(1)/usr/lib/node/
 endef
 
