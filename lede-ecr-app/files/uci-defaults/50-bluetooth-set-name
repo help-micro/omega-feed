@@ -5,13 +5,14 @@ echo Name=Omega-$(cat /sys/class/net/eth0/address|awk -F ":" '{print $5""$6}'| t
 /sbin/uci delete firewall.@zone[1].network
 /sbin/uci add_list firewall.@zone[1].network='wwan'
 /sbin/uci add_list firewall.@zone[1].network='wan'
+/sbin/uci add_list firewall.@zone[1].network='usb0'
 /sbin/uci add_list firewall.@zone[1].network='usb1'
 /sbin/uci add_list firewall.@zone[1].network='bnep0'
-/sbin/uci add_list firewall.@zone[1].network='ppp0'
+/sbin/uci add_list firewall.@zone[1].network='ppp1'
 
 /sbin/uci delete firewall.@zone[0].network
 /sbin/uci add_list firewall.@zone[0].network='wlan'
-/sbin/uci add_list firewall.@zone[0].network='usb0'
+/sbin/uci add_list firewall.@zone[0].network='ppp0'
 /sbin/uci set uhttpd.main.interpreter='.py=/usr/bin/python'
 /sbin/uci commit
 /etc/init.d/firewall restart

@@ -1,5 +1,5 @@
 #!/bin/sh
-
+exit 0
 if [ "${INTERFACE}" = "usb0" ];
     then if [ "${ACTION}" = "add" ];
         then
