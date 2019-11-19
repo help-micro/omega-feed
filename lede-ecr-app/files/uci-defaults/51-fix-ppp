@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cp /home/ftp_user/ppp.sh /lib/netifd/proto/ppp.sh
