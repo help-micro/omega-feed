@@ -20,5 +20,15 @@ do
         then
                 ifup wan
         fi
+        
+        # Up ppp link if required
+        ppp_status=$(ubus call network.interface.ppp0 status)
+        json_load "$ppp_status"
+        json_get_var "ppp_up" "up"
+        json_get_var "ppp_proto" "proto"
+        if [ "$ppp_proto" == "ppp" ] && [ $ppp_up == 0 ]
+        then
+            /home/uart.sh
+        fi
         sleep 5
 done
