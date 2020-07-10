@@ -126,36 +126,59 @@
 			};
 
 			// populate a wifi network
-			var setupWifiNetwork = function (devId, ssid, password, auth, bAp) {
+			var setupWifiNetwork = function (devId, ssid, password, auth, bAp, hidden) {
 				var promise = new Promise(function (resolve, reject) {
 					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
 						if (!err) {
 							this.deviceProvider = deviceProvider;
 							var cmd = 'add';
 							if (bAp) cmd = '-ap edit';
-
-							this.deviceProvider.callService(devId,'onion', 'wifi-setup', {
-								command: cmd,
-								base64: true,
-								params: {
-									ssid: btoa(ssid),
-									password: btoa(password),
-									encr: btoa(auth)
-								}
+							var params = {
+								ssid: btoa(ssid),
+								password: btoa(password),
+								encr: btoa(auth)
+							};
+							var self = this;
+							this.deviceProvider.callService(null,'onion-bt', 'getNetworksStatuses', {
 							}, (function (err, resp) {
-								if (resp) {
-									if (resp.success) {
-										console.log('Successfully added wireless network');
-										resolve();
-									} else {
-										console.log('Unable to add wireless network.');
-										reject(Error('Unable to add wireless network'));
+								if (resp && resp.results) {
+									if (resp.results.length > 0) {
+										var bssid = ""
+										resp.results.forEach(function(item) {
+											if (item.ssid == "") {
+												bssid = item.bssid
+											}
+										})
+										if (bssid.length > 0 && hidden) {
+											console.log(bssid, hidden)
+											params['bssid'] = btoa(bssid);
+										}
 									}
-								} else {
-									console.log('Sending request to add wireless network failed');
-									reject(Error('Sending request to add wireless network failed'));
+									self.deviceProvider.callService(devId,'onion', 'wifi-setup', {
+										command: cmd,
+										base64: true,
+										params: params
+									}, (function (err, resp) {
+										if (resp) {
+											if (resp.success) {
+												console.log('Successfully added wireless network');
+												resolve();
+											} else {
+												console.log('Unable to add wireless network.');
+												reject(Error('Unable to add wireless network'));
+											}
+										} else {
+											console.log('Sending request to add wireless network failed');
+											reject(Error('Sending request to add wireless network failed'));
+										}
+									}).bind(self));
+                                }
+								else {
+									reject(Error('Connection error'))
 								}
-							}).bind(this));
+							})).bind(this);
+
+							
 						}
 					}.bind(this));
 				}.bind(this));
