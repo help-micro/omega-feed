@@ -445,7 +445,7 @@
 			var getFiscalDeviceStatus = function (devId) {
 				var message = 'Unable to fetch fiscal device status';
 				var promise = new Promise(function (resolve, reject) {
-					this.deviceProvider.callService(devId, "network.interface.ppp0", 'status', {
+					this.deviceProvider.callService(devId, "network.interface.usb0", 'status', {
 					}, function (err, response) {
 						if (response) {
 							if (response.up) {

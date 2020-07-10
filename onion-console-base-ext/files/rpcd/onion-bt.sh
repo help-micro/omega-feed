@@ -5,7 +5,7 @@
 
 case "$1" in
    list)
-        echo '{"getDevices": {}, "scanStop": {}, "state": {}, "power": {}, "scan": {}, "pair": {}, "connect": {}, "disconnect": {}, "remove": {}, "set3G": {}, "getLeases": {}, "clearLeases": {}, "getUSBDevices": {}, "restartNetwork": {}}'
+        echo '{"getDevices": {}, "scanStop": {}, "state": {}, "power": {}, "scan": {}, "pair": {}, "connect": {}, "disconnect": {}, "remove": {}, "set3G": {}, "getLeases": {}, "clearLeases": {}, "getUSBDevices": {}, "restartNetwork": {}, "getNetworksStatuses": {}}'
    ;;
    call)
         case "$2" in
@@ -99,6 +99,10 @@ case "$1" in
 			;;
 			getDevices)
 				/usr/bin/pybluez/get-devices
+			;;
+			getNetworksStatuses)
+				output=$(ubus call onion wifi-scan '{"device":"ra0"}')
+				echo $output
 			;;
 
         esac

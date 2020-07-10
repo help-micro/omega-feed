@@ -8,7 +8,7 @@
 		(function () {
 			// var this = null;
 			
-			var section = 'usb0';
+			var section = 'ppp0';
 
 			var created = function () {
 				// this = this;
@@ -99,7 +99,7 @@
 			
 			var getNetworkState = function (devId) {
 				var promise = new Promise(function (resolve, reject) {
-					this.deviceProvider.callService(devId, "network.interface.usb0", 'status', {
+					this.deviceProvider.callService(devId, "network.interface.ppp0", 'status', {
 						
 					}, function (err, response) {
 						if (response) {
