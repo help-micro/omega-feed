@@ -28,11 +28,10 @@ PKG_LICENSE_FILES:=
 include $(INCLUDE_DIR)/package.mk
 
 define Package/node-usb-detection
-	DEPENDS:=+node
 	SUBMENU:=Node.js
 	SECTION:=lang
 	CATEGORY:=Languages
-	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp +libudev
+	DEPENDS:=+node +libusb-1.0 +hidapi +libstdcpp +libudev
 	TITLE:=Node.js package to detect USB devices
 	URL:=https://github.com/MadLittleMods/node-usb-detection.git
 endef
