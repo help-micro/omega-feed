@@ -19,7 +19,7 @@ PKG_SOURCE_VERSION:=49655a5076d2e5416c63ef5c2851beca4ed84c26
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 
 PKG_BUILD_DEPENDS:=node/host
-PKG_NODE_VERSION:=4.4.5
+PKG_NODE_VERSION:=4.3.1
 
 PKG_MAINTAINER:=John Crispin <blogic@openwrt.org>
 PKG_LICENSE:=Custom
@@ -28,10 +28,11 @@ PKG_LICENSE_FILES:=
 include $(INCLUDE_DIR)/package.mk
 
 define Package/node-usb-detection
+	DEPENDS:=+node
 	SUBMENU:=Node.js
 	SECTION:=lang
 	CATEGORY:=Languages
-	DEPENDS:=+node +libusb-1.0 +hidapi +libstdcpp +libudev
+	DEPENDS:=+libusb-1.0 +hidapi +libstdcpp +libudev
 	TITLE:=Node.js package to detect USB devices
 	URL:=https://github.com/MadLittleMods/node-usb-detection.git
 endef
