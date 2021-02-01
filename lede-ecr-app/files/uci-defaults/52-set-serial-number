@@ -1,0 +1,30 @@
+#!/bin/sh
+
+
+# Get MAC address in the HEX format
+MAC=0x$(cat /sys/class/net/eth0/address|awk -F ":" '{print $5""$6}'| tr a-z A-Z)
+
+# Convert HEX to decimal
+MAC=$(($MAC))
+
+# Convert decimal to an order number
+MAC=$(($((MAC+2))/3))
+
+# Set name
+NAME=Omega-$MAC
+
+# Set all friendly names
+uci set system.@system[0].hostname="$NAME"
+uci set wireless.ap.ssid="$NAME"
+uci commit
+
+sed '/Name=.*/d' /etc/bluetooth/main.conf > /tmp/test.txt
+echo Name=$NAME >> /tmp/test.txt
+cp /tmp/test.txt /etc/bluetooth/main.conf
+
+sed '/friendly_name=.*/d' /usr/share/miniupnpd/miniupnpd.manufacture.conf > /tmp/test.txt
+echo friendly_name=$NAME >> /tmp/test.txt
+cp /tmp/test.txt /usr/share/miniupnpd/miniupnpd.manufacture.conf
+
+/etc/init.d/network restart
+/etc/init.d/miniupnpd restart
