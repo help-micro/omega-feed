@@ -11,7 +11,7 @@ MAC=$((MAC-0xC00000))
 MAC=$(($((MAC+2))/3))
 
 # Set series
-SERIES=ФР
+SERIES=GN
 
 # Pad the order number and concat it with the series
 NAME=$SERIES$(printf %08d $MAC)
