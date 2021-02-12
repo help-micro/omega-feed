@@ -96,6 +96,7 @@
 			};  
 				  
 			var startHeartbeat = function (interval) {
+			    this.heartbeat();
 			    this.heartbeatInterval = setInterval((function () {  
 			    	this.heartbeat();
 			    }.bind(this)), interval);
