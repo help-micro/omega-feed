@@ -41,6 +41,9 @@
 				"network.interface.ppp0": [
 					"status"
 				],
+				"network.interface.wan": [
+					"status"
+				],
                                 "network.interface": [
                                         "dump"
                                 ],

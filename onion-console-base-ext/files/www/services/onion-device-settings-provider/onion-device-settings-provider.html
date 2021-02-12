@@ -10,35 +10,51 @@
 			var rxtxResult = null;
 
 			var ready = function (){
-				onionConsole.getService('onion-device-provider', (function (err, deviceProvider) {
-					console.log('getting device provider complete');
-					this.deviceProvider = deviceProvider;
+				
+onionConsole.getService('onion-device-provider', (function (err, 
+deviceProvider) {
+					console.log('getting device 
+provider complete');
+					this.deviceProvider = 
+deviceProvider;
 
-					this.getDeviceType((function (type) {
+					this.getDeviceType((function 
+(type) {
 						this.device 	= type;
-						if (type === 'Onion Omega') {
-							this.deviceRadio = 'wlan0';
-						} else if (type === 'Onion Omega2' || type === 'Onion Omega2+') {
-							this.deviceRadio = 'ra0';
+						if (type === 'Onion 
+Omega') {
+							this.deviceRadio 
+= 'wlan0';
+						} else if (type === 
+'Onion Omega2' || type === 'Onion Omega2+') {
+							this.deviceRadio 
+= 'ra0';
 						}
 					}).bind(this));
 				}).bind(this));
 
-				onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
+				
+onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
 					this.ubus = ubus;
 				}).bind(this));
 			};
 
-			var checkLogin = function(devId, password, callback){
-				onionConsole.getService('onion-device-provider', (function (err, deviceProvider) {
-					deviceProvider.callService(devId, 'session', 'login', {
+			var checkLogin = function(devId, password, 
+callback){
+				
+onionConsole.getService('onion-device-provider', (function (err, 
+deviceProvider) {
+					
+deviceProvider.callService(devId, 'session', 'login', {
 						username: 'root',
 						password: password
 					}, function (err,data) {
 						if (data) {
-							console.log('Correct password')
+							
+console.log('Correct password')
 						} else {
-							reject(Error('Incorrect current password.'));
+							
+reject(Error('Incorrect current password.'));
 						}
 					});
 				}));
@@ -47,9 +63,12 @@
 			var getDeviceType = function(devId,callback){
 				var params = {};
 				callback = callback || this.noop;
-					this.deviceProvider.callService(devId, 'system', 'board', params, function(err, result){
+					
+this.deviceProvider.callService(devId, 'system', 'board', params, 
+function(err, result){
 						if (!err) {
-							callback(result.model);
+							
+callback(result.model);
 						} else {
 							callback(err);
 						}
@@ -62,14 +81,17 @@
 			// 		device: this.deviceRadio
 			// 	};
 			// 	macResult = callback || this.noop;
-			// 	this.ubus.request('iwinfo', 'assoclist', params, setMACResult);
+			// 	this.ubus.request('iwinfo', 'assoclist', 
+params, setMACResult);
 			// };
 
 			// var setMACResult = function (result) {
 			// 	var returnCode = result[0];
 			// 	if (returnCode === 0) {
-			// 		if (result[1] !== null && result[1].results[0] !== null && result[1].results[0].mac !== null) {
-			// 			var mac = result[1].results[0].mac;
+			// 		if (result[1] !== null && 
+result[1].results[0] !== null && result[1].results[0].mac !== null) {
+			// 			var mac = 
+result[1].results[0].mac;
 
 			// 			macResult({
 			// 				mac: mac
@@ -80,7 +102,8 @@
 			// 			});
 			// 		}
 			// 	} else {
-			// 		console.log('Failed to get MAC address!')
+			// 		console.log('Failed to get MAC 
+address!')
 			// 		macResult({
 			// 			mac: ''
 			// 		});
@@ -88,23 +111,28 @@
 			// };
 
 			var getSystem = function (devId,callback) {
-				this.deviceProvider.callService(devId, 'system', 'info', {}, callback);
+				this.deviceProvider.callService(devId, 
+'system', 'info', {}, callback);
 			};
 
 			var rebootSystem = function (devId,callback) {
-				this.deviceProvider.callService(devId, 'rpc-sys', 'reboot', {}, callback);
+				this.deviceProvider.callService(devId, 
+'rpc-sys', 'reboot', {}, callback);
 			};
 
 			var getRxTx = function (devId, callback) {
 				var params =  {};
 				callback = callback || this.noop;
 
-				this.deviceProvider.callService(devId, 'network.device','status', params, (function(err, result){
-					this.setRxTxResult(devId,err, result,callback);
+				this.deviceProvider.callService(devId, 
+'network.device','status', params, (function(err, result){
+					this.setRxTxResult(devId,err, 
+result,callback);
 				}).bind(this));
 			};
 
-			var setRxTxResult = function (devId, err, result, callback) {
+			var setRxTxResult = function (devId, err, 
+result, callback) {
 				var returnCode = err;
 				var receivedkB = 0;
 				var transmittedkB = 0;
@@ -112,29 +140,44 @@
 					var receivedkB = 0;
 					var transmittedkB = 0;
 
-					this.getDeviceType(devId, function (deviceType) {
-						var deviceRadio	= 'wlan0';
-						// find radio type based on device
-						if (deviceType === 'Onion Omega2' || deviceType === 'Onion Omega2+') {
-							deviceRadio = 'ra0';
+					this.getDeviceType(devId, 
+function (deviceType) {
+						var deviceRadio	= 
+'wlan0';
+						// find radio type based 
+on device
+						if (deviceType === 
+'Onion Omega2' || deviceType === 'Onion Omega2+') {
+							deviceRadio = 
+'ra0';
 						}
-						var radioInfo = result[deviceRadio];
+						var radioInfo = 
+result[deviceRadio];
 
-						var rx = radioInfo.statistics.rx_bytes;
-						receivedkB = parseInt(rx);
+						var rx = 
+radioInfo.statistics.rx_bytes;
+						receivedkB = 
+parseInt(rx);
 						if (receivedkB > 0) {
-							receivedkB = (receivedkB / 1000).toFixed(0);
+							receivedkB = 
+(receivedkB / 1000).toFixed(0);
 						}
-						var tx = radioInfo.statistics.tx_bytes;
-						transmittedkB = parseInt(tx);
+						var tx = 
+radioInfo.statistics.tx_bytes;
+						transmittedkB = 
+parseInt(tx);
 						if (transmittedkB > 0) {
-							transmittedkB = (transmittedkB / 1000).toFixed(0);
+							transmittedkB = 
+(transmittedkB / 1000).toFixed(0);
 						}
-						callback([{received:receivedkB},{transmitted:transmittedkB}]);
+						
+callback([{received:receivedkB},{transmitted:transmittedkB}]);
 					});
 				} else {
-					console.log('Failed to get received bytes and transmitted bytes!');
-					callback([{received: ''}, {transmitted: ''}]);
+					console.log('Failed to get 
+received bytes and transmitted bytes!');
+					callback([{received: ''}, 
+{transmitted: ''}]);
 				}
 			};
 
@@ -144,7 +187,8 @@
 			// 		command: 'ifconfig'
 			// 	};
 			// 	ipResult = callback || this.noop;
-			// 	this.ubus.request('file', 'exec', params, setIPResult);
+			// 	this.ubus.request('file', 'exec', 
+params, setIPResult);
 			// };
 
 			// var setIPResult = function (result) {
@@ -153,55 +197,138 @@
 			// 	var ip = '-';
 			// 	var netmask = '-';
 			// 	console.log(result);
-			// 	if (result[0] === 0 && result[1].code === 0) {
-			// 		var wlanIndex = result[1].stdout.indexOf('wlan0');
+			// 	if (result[0] === 0 && result[1].code 
+=== 0) {
+			// 		var wlanIndex = 
+result[1].stdout.indexOf('wlan0');
 			// 		if (wlanIndex > 0) {
 			// 			available = true;
-			// 			var startIndex = result[1].stdout.indexOf('inet addr:', wlanIndex);
-			// 			var endIndex = result[1].stdout.indexOf('  Bcast', startIndex);
-			// 			ip = result[1].stdout.substring(startIndex + 'inet addr:'.length, endIndex);
-			// 			startIndex = result[1].stdout.lastIndexOf('Mask:');
-			// 			endIndex = result[1].stdout.indexOf('\n', startIndex);
-			// 			netmask = result[1].stdout.substring(startIndex + 'Mask:'.length, endIndex);
+			// 			var startIndex = 
+result[1].stdout.indexOf('inet addr:', wlanIndex);
+			// 			var endIndex = 
+result[1].stdout.indexOf('  Bcast', startIndex);
+			// 			ip = 
+result[1].stdout.substring(startIndex + 'inet addr:'.length, endIndex);
+			// 			startIndex = 
+result[1].stdout.lastIndexOf('Mask:');
+			// 			endIndex = 
+result[1].stdout.indexOf('\n', startIndex);
+			// 			netmask = 
+result[1].stdout.substring(startIndex + 'Mask:'.length, endIndex);
 			// 		} else {
-			// 			console.log('Failed to retrieve IP address information!');
+			// 			console.log('Failed to 
+retrieve IP address information!');
 			// 		}
 			// 	} else {
-			// 		console.log('Failed to execute IP address command!');
+			// 		console.log('Failed to execute 
+IP address command!');
 			// 	}
 
-			// 	ipResult([{available: available}, {ip: ip}, {netmask: netmask}]);
+			// 	ipResult([{available: available}, {ip: 
+ip}, {netmask: netmask}]);
 			// };
 
 
 			var getIpAddr = function(devId,callback){
 				var params = {};
 				callback = callback || this.noop;
-				this.deviceProvider.callService(devId, 'network.interface.wwan', 'status', params, function(err, result){
+				this.deviceProvider.callService(devId, 
+'network.interface.wwan', 'status', params, function(err, result){
 					if (!err) {
-						var response = result['ipv4-address'][0]['address'];
+						var response = 
+result['ipv4-address'][0]['address'];
 						callback(response);
 					} else {
 						callback(err);
 					}
 				}.bind(this));
 			};
+			
+			var createNetmaskAddr = function(bitCount) {
+			  var mask = [], i, n;
+			  for(i=0; i<4; i++) {
+				n = Math.min(bitCount, 8);
+				mask.push(256 - Math.pow(2, 8-n));
+				bitCount -= n;
+			  }
+			  return mask.join('.');
+			};
+			
+			var getEthernetIpAddr = 
+function(devId,callback){
+				var params = {};
+				callback = callback || this.noop;
+				this.deviceProvider.callService(devId, 
+'network.interface.wan', 'status', params, function(err, result){
+					if (!err) {
+						var response = {
+							ip: "",
+							netmask: ""
+						};
+						if 
+(result['ipv4-address']) {
+							response['ip'] = 
+result['ipv4-address'][0]['address'];
+							
+response['netmask'] = 
+createNetmaskAddr(result['ipv4-address'][0]['mask']);
+						}
+						callback(response);
+					} else {
+						callback(err);
+					}
+				}.bind(this));
+			};
+			
+			
+			var getEthernetMacAddr = function(devId, 
+callback){
+				this.getDeviceType(devId, 
+(function(deviceType) {
+					var deviceRadio	= 'eth0';
+					// find radio type based on 
+device
+					
+
+					
+this.deviceProvider.callService(devId, 'network.device','status',
+						{
+							name: 
+deviceRadio
+						},
+					function(err, result){
+						if(!err){
+							
+callback(result.macaddr);
+						}else{
+							callback('');
+						}
+					});
+				}).bind(this));
+			}
 
 			var getNetMask = function(devId, callback){
-				this.getDeviceType(devId,(function(device){
+				
+this.getDeviceType(devId,(function(device){
 					var params = {
 						config: 'network',
 						section: 'wlan',
 						option: 'netmask'
 					};
 
-					callback = callback || this.noop;
-					this.deviceProvider.callService(devId, 'uci','get', params, function(err, result){
+					callback = callback || 
+this.noop;
+					
+this.deviceProvider.callService(devId, 'uci','get', params, 
+function(err, result){
 						if (!err) {
-							var response = result.value;
-							callback(response);
+							var response = 
+result.value;
+							
+callback(response);
 						} else {
-							callback('error: ', err);
+							callback('error: 
+', err);
 						}
 					});
 				}).bind(this));
@@ -211,7 +338,8 @@
 			// var setIPAddrResult = function(result){
 			// 	console.log(result);
 			// 	// if(result[0]===0){
-			// 	// 	console.log(result[1].ipv4-address[0].address);
+			// 	// 	
+console.log(result[1].ipv4-address[0].address);
 			// 	// 	ip =
 			// 	// }
 			// 	var returnCode = result[0];
@@ -221,44 +349,58 @@
 			// };
 
 			var isOnline = function(devId,callback){
-				this.getDeviceType(devId,(function(deviceType) {
+				
+this.getDeviceType(devId,(function(deviceType) {
 					var deviceRadio	= 'wlan0';
-					// find radio type based on device
-					if (deviceType === 'Onion Omega2' || deviceType === 'Onion Omega2+') {
+					// find radio type based on 
+device
+					if (deviceType === 'Onion 
+Omega2' || deviceType === 'Onion Omega2+') {
 						deviceRadio = 'ra0';
 					}
 
 					var available = false;
-					this.deviceProvider.callService(devId, 'network.device','status',
+					
+this.deviceProvider.callService(devId, 'network.device','status',
 						{
-							name: this.deviceRadio
+							name: 
+this.deviceRadio
 						},
 					function(err, result){
 						if(!err){
-							available = true;
-							callback(available);
+							available = 
+true;
+							
+callback(available);
 						}else{
-							callback(available);
+							
+callback(available);
 						}
 					});
 				}).bind(this));
 			};
 
 			var getMacAddr = function(devId, callback){
-				this.getDeviceType(devId, (function(deviceType) {
+				this.getDeviceType(devId, 
+(function(deviceType) {
 					var deviceRadio	= 'wlan0';
-					// find radio type based on device
-					if (deviceType === 'Onion Omega2' || deviceType === 'Onion Omega2+') {
+					// find radio type based on 
+device
+					if (deviceType === 'Onion 
+Omega2' || deviceType === 'Onion Omega2+') {
 						deviceRadio = 'apcli0';
 					}
 
-					this.deviceProvider.callService(devId, 'network.device','status',
+					
+this.deviceProvider.callService(devId, 'network.device','status',
 						{
-							name: deviceRadio
+							name: 
+deviceRadio
 						},
 					function(err, result){
 						if(!err){
-							callback(result.macaddr);
+							
+callback(result.macaddr);
 						}else{
 							callback('');
 						}
@@ -268,126 +410,220 @@
 
 
 
-			var changePassword = function (devId, passwordCurrent, passwordNew, passwordNewVerify) {
-				var promise = new Promise(function (resolve, reject) {
-					if (passwordNew === passwordNewVerify) {
-						onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
-							checkLogin(devId, passwordCurrent);
-								// onionConsole.getService('onion-ubus-provider', function (err, ubus) {
-								// 	ubus.request('file', 'exec', {
-								// 		command: 'change-password',
-								// 		params: [
-								// 			'-user', 'root',
-								// 			'-password', passwordNew,
-								// 			'-verify', passwordNew
-								// 		]
-								// 	}, function (data) {
-								// 		if (data.length === 2 && data[0] === 0) {
-								// 			resolve('You have successfully changed your password!');
-								// 		} else {
-								// 			reject(Error('Failed to change your password.'));
-								// 		}
-								// 	});
+			var changePassword = function (devId, 
+passwordCurrent, passwordNew, passwordNewVerify) {
+				var promise = new Promise(function 
+(resolve, reject) {
+					if (passwordNew === 
+passwordNewVerify) {
+						
+onionConsole.getService('onion-device-provider', function (err, 
+deviceProvider) {
+							
+checkLogin(devId, passwordCurrent);
+								// 
+onionConsole.getService('onion-ubus-provider', function (err, ubus) {
+								// 	
+ubus.request('file', 'exec', {
+								// 		
+command: 'change-password',
+								// 		
+params: [
+								// 			
+'-user', 'root',
+								// 			
+'-password', passwordNew,
+								// 			
+'-verify', passwordNew
+								// 		
+]
+								// 	
+}, function (data) {
+								// 		
+if (data.length === 2 && data[0] === 0) {
+								// 			
+resolve('You have successfully changed your password!');
+								// 		
+} else {
+								// 			
+reject(Error('Failed to change your password.'));
+								// 		
+}
+								// 	
+});
 								// });
-							deviceProvider.callService(devId,'file', 'exec', {
-									command: 'change-password',
-									params: [
-										'-user', 'root',
-										'-password', passwordNew,
-										'-verify', passwordNew
-									]
-								}, function (err,data) {
-									if (data) {
-										resolve('You have successfully changed your password!');
-									} else {
-										reject(Error('Failed to change your password.'));
-									}
+							
+deviceProvider.callService(devId,'file', 'exec', {
+									
+command: 'change-password',
+									
+params: [
+										
+'-user', 'root',
+										
+'-password', passwordNew,
+										
+'-verify', passwordNew
+									
+]
+								}, 
+function (err,data) {
+									
+if (data) {
+										
+resolve('You have successfully changed your password!');
+									
+} else {
+										
+reject(Error('Failed to change your password.'));
+									
+}
 								});
 						});
 					} else {
-						reject(Error("New passwords don't match."));
+						reject(Error("New 
+passwords don't match."));
 					}
 				});
 
 				return promise;
 			};
 
-			var changeHostname = function (devId,hostnameNew) {
-				var promise = new Promise(function (resolve, reject) {
+			var changeHostname = function 
+(devId,hostnameNew) {
+				var promise = new Promise(function 
+(resolve, reject) {
 					if (hostname !== '') {
-						// onionConsole.getService('onion-ubus-provider', function (err, ubus) {
-						// 	ubus.request('uci', 'set', {
-						// 		config: 'system',
-						// 		section: '@system[0]',
-						// 		values: {
-						// 			hostname: hostnameNew
+						// 
+onionConsole.getService('onion-ubus-provider', function (err, ubus) {
+						// 	
+ubus.request('uci', 'set', {
+						// 		config: 
+'system',
+						// 		section: 
+'@system[0]',
+						// 		values: 
+{
+						// 			
+hostname: hostnameNew
 						// 		}
-						// 	}, function (result) {
-						// 		if (result[0] === 0) {
-						// 			ubus.request('uci', 'commit', {
-						// 				config: 'system'
-						// 			}, function (result) {
-						// 				if (result[0] === 0) {
-						// 					resolve('Hostname changed successfully.');
-						// 				}
-						// 			});
+						// 	}, function 
+(result) {
+						// 		if 
+(result[0] === 0) {
+						// 			
+ubus.request('uci', 'commit', {
+						// 				
+config: 'system'
+						// 			
+}, function (result) {
+						// 				
+if (result[0] === 0) {
+						// 					
+resolve('Hostname changed successfully.');
+						// 				
+}
+						// 			
+});
 						// 		} else {
-						// 			reject(Error('Unable to set the hostname.'));
+						// 			
+reject(Error('Unable to set the hostname.'));
 						// 		}
 						// 	});
 						// });
-						onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
-							deviceProvider.callService(devId,'uci', 'set', {
-									config: 'system',
-									section: '@system[0]',
-									values: {
-										hostname: hostnameNew
-									}
-								}, function (err,result) {
-									if (!err) {
-										deviceProvider.callService(devId, 'uci', 'commit', {
-											config: 'system'
-										}, function (err, result) {
-											if (!err) {
-												resolve('Hostname changed successfully.');
-											}
-										});
-									} else {
-										reject(Error('Unable to set the hostname.'));
-									}
-								}.bind(this));
+						
+onionConsole.getService('onion-device-provider', function (err, 
+deviceProvider) {
+							
+deviceProvider.callService(devId,'uci', 'set', {
+									
+config: 'system',
+									
+section: '@system[0]',
+									
+values: {
+										
+hostname: hostnameNew
+									
+}
+								}, 
+function (err,result) {
+									
+if (!err) {
+										
+deviceProvider.callService(devId, 'uci', 'commit', {
+											
+config: 'system'
+										
+}, function (err, result) {
+											
+if (!err) {
+												
+resolve('Hostname changed successfully.');
+											
+}
+										
+});
+									
+} else {
+										
+reject(Error('Unable to set the hostname.'));
+									
+}
+								
+}.bind(this));
 							});
 					} else {
-						reject(Error('Hostname cannot be empty.'));
+						reject(Error('Hostname 
+cannot be empty.'));
 					}
 				});
 
 				return promise;
 			};
 
-			var changeTimezone = function (devId, timezoneNew, zonenameNew) {
-				var promise = new Promise(function (resolve, reject) {
-				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
-						deviceProvider.callService(devId, 'uci', 'set', {
-							config: 'system',
-							section: '@system[0]',
+			var changeTimezone = function (devId, 
+timezoneNew, zonenameNew) {
+				var promise = new Promise(function 
+(resolve, reject) {
+				
+onionConsole.getService('onion-device-provider', function (err, 
+deviceProvider) {
+						
+deviceProvider.callService(devId, 'uci', 'set', {
+							config: 
+'system',
+							section: 
+'@system[0]',
 							values: {
-								timezone: timezoneNew,
-								zonename: zonenameNew
+								
+timezone: timezoneNew,
+								
+zonename: zonenameNew
 							}
-						}, function (err, result) {
+						}, function (err, 
+result) {
 							if (!err) {
-								deviceProvider.callService(devId, 'uci', 'commit', {
-									config: 'system'
-								}, function (err, result) {
-									if (!err) {
-										resolve('Timezone changed successfully.');
-									} else {
-										reject(Error('Unable to set the timezone with UBUS'));
-									}
+								
+deviceProvider.callService(devId, 'uci', 'commit', {
+									
+config: 'system'
+								}, 
+function (err, result) {
+									
+if (!err) {
+										
+resolve('Timezone changed successfully.');
+									
+} else {
+										
+reject(Error('Unable to set the timezone with UBUS'));
+									
+}
 								});
 							} else {
-								reject(Error('Unable to set the timezone.'));
+								
+reject(Error('Unable to set the timezone.'));
 							}
 						}.bind(this));
 						});
@@ -397,19 +633,28 @@
 			};
 
 			var shutdown = function (devId) {
-				var shutdownPromise = new Promise(function (resolve, reject) {
-				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
-						deviceProvider.callService(devId,'file', 'exec', {
-							command: 'power-down',
+				var shutdownPromise = new 
+Promise(function (resolve, reject) {
+				
+onionConsole.getService('onion-device-provider', function (err, 
+deviceProvider) {
+						
+deviceProvider.callService(devId,'file', 'exec', {
+							command: 
+'power-down',
 							params: [
 								'-f'
 							]
-						}, function (err, result) {
-							console.log(result);
+						}, function (err, 
+result) {
+							
+console.log(result);
 							if (result) {
-								resolve();
+								
+resolve();
 							} else {
-								reject();
+								
+reject();
 							}
 						});
 						});
@@ -419,21 +664,30 @@
 			};
 
 			var reboot = function (devId) {
-				var rebootPromise = new Promise(function (resolve, reject) {
-				onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
-						deviceProvider.callService(devId,'file', 'exec', {
-							command: 'reboot',
+				var rebootPromise = new Promise(function 
+(resolve, reject) {
+				
+onionConsole.getService('onion-device-provider', function (err, 
+deviceProvider) {
+						
+deviceProvider.callService(devId,'file', 'exec', {
+							command: 
+'reboot',
 							params: [
 								'-d',
 								'5',
 								'&'
 							]
-						}, function (err,result) {
-							console.log(result);
+						}, function (err,result) 
+{
+							
+console.log(result);
 							if (result) {
-								resolve();
+								
+resolve();
 							} else {
-								reject();
+								
+reject();
 							}
 						});
 
@@ -443,31 +697,52 @@
 			};
 			
 			var getFiscalDeviceStatus = function (devId) {
-				var message = 'Unable to fetch fiscal device status';
-				var promise = new Promise(function (resolve, reject) {
-					this.deviceProvider.callService(devId, "network.interface.ppp0", 'status', {
+				var message = 'Unable to fetch fiscal 
+device status';
+				var promise = new Promise(function 
+(resolve, reject) {
+					
+this.deviceProvider.callService(devId, "network.interface.ppp0", 
+'status', {
 					}, function (err, response) {
 						if (response) {
-							if (response.up) {
-								this.deviceProvider.callService(devId, "onion-bt", 'getLeases', {
-								}, function (err, responseLeases) {
-									if (responseLeases) {
-										if (responseLeases.address) {
-											response.lease = responseLeases;
-										}
-										resolve(response);
-									} else {
-										reject(message);
-									}
-								}.bind(this));
+							if (response.up) 
+{
+								
+this.deviceProvider.callService(devId, "onion-bt", 'getLeases', {
+								}, 
+function (err, responseLeases) {
+									
+if (responseLeases) {
+										
+if (responseLeases.address) {
+											
+response.lease = responseLeases;
+										
+}
+										
+resolve(response);
+									
+} else {
+										
+reject(message);
+									
+}
+								
+}.bind(this));
 							}
 							else {
-								response.lease = {
-									ip: '-',
-									address: '-',
-									device: '-'
+								
+response.lease = {
+									
+ip: '-',
+									
+address: '-',
+									
+device: '-'
 								};
-								resolve(response);
+								
+resolve(response);
 							}
 						} else {
 							reject(message);
@@ -479,11 +754,15 @@
 			
 			var clearLeases = function (devId) {
 				var message = "Unable to clear leases";
-				var promise = new Promise(function (resolve, reject) {
-					this.deviceProvider.callService(devId, "onion-bt", 'clearLeases', {
+				var promise = new Promise(function 
+(resolve, reject) {
+					
+this.deviceProvider.callService(devId, "onion-bt", 'clearLeases', {
 					}, function (err, response) {
-						if (response && response.success) {
-							resolve(response);
+						if (response && 
+response.success) {
+							
+resolve(response);
 						}
 						else {
 							reject(message);
@@ -494,13 +773,17 @@
 			};
 			
 			var restartNetworkService = function (devId) {
-				var promise = new Promise(function (resolve, reject) {
-					this.deviceProvider.callService(devId, "onion-bt", 'restartNetwork', {
+				var promise = new Promise(function 
+(resolve, reject) {
+					
+this.deviceProvider.callService(devId, "onion-bt", 'restartNetwork', {
 					}, function (err, response) {
 						if (response && !err) {
-							resolve(response);
+							
+resolve(response);
 						} else {
-							var message = 'Unable to restart network service';
+							var message = 
+'Unable to restart network service';
 							reject(message);
 						}
 					}.bind(this));
@@ -533,6 +816,9 @@
 
 				isOnline: isOnline,
 				getMacAddr: getMacAddr,
+				
+				getEthernetIpAddr: getEthernetIpAddr,
+				getEthernetMacAddr: getEthernetMacAddr,
 
 				// setIPAddrResult: setIPAddrResult,
 
@@ -542,10 +828,13 @@
 
 				shutdown: shutdown,
 				reboot: reboot,
-				getFiscalDeviceStatus: getFiscalDeviceStatus,
+				getFiscalDeviceStatus: 
+getFiscalDeviceStatus,
 				clearLeases: clearLeases,
-				restartNetworkService: restartNetworkService
+				restartNetworkService: 
+restartNetworkService
 			});
 		})();
 	</script>
 </dom-module>
+

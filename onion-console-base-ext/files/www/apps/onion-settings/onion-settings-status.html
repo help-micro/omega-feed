@@ -1,5 +1,6 @@
 <link rel="import" href="../../lib/polymer/polymer.html">
-<link rel="import" href="../../elements/bootstrap-alert/bootstrap-alert-container.html">
+<link rel="import" 
+href="../../elements/bootstrap-alert/bootstrap-alert-container.html">
 
 <dom-module id="onion-settings-status">
 	<style>
@@ -41,8 +42,10 @@
 				}
 				.status .card-block:last-child {
 					height: 225px;
-					border-bottom-right-radius: .25rem;
-					border-bottom-left-radius: .25rem;
+					border-bottom-right-radius: 
+.25rem;
+					border-bottom-left-radius: 
+.25rem;
 				}
 
 			.status > .status-heading {
@@ -121,7 +124,8 @@
 			cursor: pointer;
 		}
 
-		.status-group button:hover, .status-group button:active, .status-group button:focus {
+		.status-group button:hover, .status-group button:active, 
+.status-group button:focus {
 			background-color: #52698f;
 		}
 		@media screen and (max-width: 543px) {
@@ -138,26 +142,35 @@
 
 	<template>
         <div class="layout horizontal center-justified start">
-    		<div id="cardsContainer" class="container horizontal layout wrap">
+    		<div id="cardsContainer" class="container horizontal 
+layout wrap">
                 <div class="card status">
                     <div class="card-block status-heading">
-                        <h4 class="card-title" id="online">Onion Console</h4>
-                        <h6 class="card-subtitle">v0.1.3 - Codename Brin</h6>
+                        <h4 class="card-title" id="online">Onion 
+Console</h4>
+                        <h6 class="card-subtitle">v0.1.3 - Codename 
+Brin</h6>
                     </div>
-                    <div class="card-block horizontal center-justified layout center">
+                    <div class="card-block horizontal center-justified 
+layout center">
                         <img src="./onion-logo.png" id="onion-logo" />
                     </div>
                 </div>
 
                 <div class="card status">
                     <div class="card-block status-heading">
-                        <h4 class="card-title" id="online">{{device}}</h4>
+                        <h4 class="card-title" 
+id="online">{{device}}</h4>
                         <h6 class="card-subtitle">Device Info</h6>
                     </div>
                     <div class="card-block">
-                        <p><span>{{displayProcessorName(device)}}</span><br><strong>Processor</strong></p>
-                        <p><span>{{displayMemorySize(device)}}</span></span><br><strong>Memory</strong></p>
-                        <p><span>{{displayStorageSize(device, diskTotal)}}</span><span> MB Flash Memory</span><br><strong>Storage</strong></p>
+                        
+<p><span>{{displayProcessorName(device)}}</span><br><strong>Processor</strong></p>
+                        
+<p><span>{{displayMemorySize(device)}}</span></span><br><strong>Memory</strong></p>
+                        <p><span>{{displayStorageSize(device, 
+diskTotal)}}</span><span> MB Flash 
+Memory</span><br><strong>Storage</strong></p>
                     </div>
                 </div>
 
@@ -167,8 +180,10 @@
                         <h6 class="card-subtitle">&nbsp;</h6>
                     </div>
                     <div class="card-block">
-                        <p><span>{{diskUsed}}</span> MB / <span>{{diskTotal}}</span> MB<br><strong>Filesystem</strong></p>
-                        <progress class="progress progress-warning" value={{diskPercentage}} max="100">{{diskPercentage}}</progress>
+                        <p><span>{{diskUsed}}</span> MB / 
+<span>{{diskTotal}}</span> MB<br><strong>Filesystem</strong></p>
+                        <progress class="progress progress-warning" 
+value={{diskPercentage}} max="100">{{diskPercentage}}</progress>
                     </div>
                 </div>
 
@@ -179,9 +194,12 @@
                         <h6 class="card-subtitle">Device Status</h6>
                     </div>
                     <div class="card-block">
-                        <p><span>{{uptime}}</span><br><strong>Uptime</strong></p>
-                        <p><span>{{memory}}</span><br><strong>Memory</strong></p>
-                        <p><span>{{load}}</span><br><strong>Load</strong></p>
+                        
+<p><span>{{uptime}}</span><br><strong>Uptime</strong></p>
+                        
+<p><span>{{memory}}</span><br><strong>Memory</strong></p>
+                        
+<p><span>{{load}}</span><br><strong>Load</strong></p>
                     </div>
                 </div>
 
@@ -191,29 +209,52 @@
                         <h6 class="card-subtitle">Wi-Fi Network</h6>
                     </div>
                     <div class="card-block">
-                        <p><span>{{netmask}}</span><br><strong>Netmask</strong></p>
-                        <p><span>{{mac}}</span><br><strong>MAC Address</strong></p>
+                        
+<p><span>{{netmask}}</span><br><strong>Netmask</strong></p>
+                        <p><span>{{mac}}</span><br><strong>MAC 
+Address</strong></p>
+                    </div>
+                </div>
+				
+				<div class="card status">
+                    <div class="card-block status-heading">
+                        <h4 class="card-title">{{ethernetIP}}</h4>
+                        <h6 class="card-subtitle">Ethernet</h6>
+                    </div>
+                    <div class="card-block">
+                        
+<p><span>{{ethernetNetmask}}</span><br><strong>Netmask</strong></p>
+                        <p><span>{{ethernetMac}}</span><br><strong>MAC 
+Address</strong></p>
                     </div>
                 </div>
 
                 <div class="card status">
                     <div class="card-block status-heading">
                         <h4 class="card-title">Fiscal device: 
-							<template is="dom-if" if="{{fiscalDeviceUp}}">
+							<template 
+is="dom-if" if="{{fiscalDeviceUp}}">
 								online
 							</template>
-							<template is="dom-if" if="{{!fiscalDeviceUp}}">
+							<template 
+is="dom-if" if="{{!fiscalDeviceUp}}">
 								offline
 							</template>
 						</h4>
-                        <h6 class="card-subtitle">Fiscal device status</h6>
+                        <h6 class="card-subtitle">Fiscal device 
+status</h6>
                     </div>
                     <div class="card-block">
-                        <p><span>{{fiscalDeviceIP}}</span><br><strong>IP</strong></p>
-						<p><span>{{fiscalDeviceAddress}}</span><br><strong>Address</strong></p>
-						<template is="dom-if" if="[[fiscalDeviceReady]]">							
+                        
+<p><span>{{fiscalDeviceIP}}</span><br><strong>IP</strong></p>
+						
+<p><span>{{fiscalDeviceAddress}}</span><br><strong>Address</strong></p>
+						<template is="dom-if" 
+if="[[fiscalDeviceReady]]">							
 							<p>
-								<a class="btn btn-success" href="[[getFiscalDeviceWebPage()]]" target="__blank">Go to web page</a>
+								<a 
+class="btn btn-success" href="[[getFiscalDeviceWebPage()]]" 
+target="__blank">Go to web page</a>
 							</p>
 						</template>
                     </div>
@@ -233,8 +274,10 @@
 			var locked = false;
 
 			var start = function () {
-				console.log('Start Function for the onion-status app')
-				onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
+				console.log('Start Function for the 
+onion-status app')
+				
+onionConsole.getService('onion-ubus-provider', (function (err, ubus) {
 					var params = {
 						config: 'system',
 						section: '@system[0]',
@@ -242,9 +285,11 @@
 					};
 
 					this.ubus = ubus;
-					this.ubus.request('uci', 'get', params, function (result) {
+					this.ubus.request('uci', 'get', 
+params, function (result) {
 						if (result[0] === 0) {
-							this.hostname = result[1].value;
+							this.hostname = 
+result[1].value;
 						}
 					});
 				}).bind(this));
@@ -253,21 +298,33 @@
 			var ready = function() {
 				this.title = 'Device Status';
 
-				onionConsole.getService('onion-session-provider', (function (err, sessionProvider) {
-					this.sessionProvider = sessionProvider;
+				
+onionConsole.getService('onion-session-provider', (function (err, 
+sessionProvider) {
+					this.sessionProvider = 
+sessionProvider;
 
 
-					if (this.sessionProvider.isAlive() === true) {
-						onionConsole.getService('onion-device-settings-provider', (function (err, deviceSettingsProvider) {
-							this.deviceSettingsProvider = deviceSettingsProvider;
+					if 
+(this.sessionProvider.isAlive() === true) {
+						
+onionConsole.getService('onion-device-settings-provider', (function 
+(err, deviceSettingsProvider) {
+							
+this.deviceSettingsProvider = deviceSettingsProvider;
 
-							// find the device
-							this.deviceSettingsProvider.getDeviceType(null,(function (deviceType) {
-								this.device = deviceType;
+							// find the 
+device
+							
+this.deviceSettingsProvider.getDeviceType(null,(function (deviceType) {
+								
+this.device = deviceType;
 							}).bind(this));
 
-							// refresh all status info
-							this.refreshInfo();
+							// refresh all 
+status info
+							
+this.refreshInfo();
 						}).bind(this));
 					}
 				}).bind(this));
@@ -275,8 +332,10 @@
 
 			// add zero padding to integers
 			function zeroPad(num, places) {
-				var zero = places - num.toString().length + 1;
-				return Array(+(zero > 0 && zero)).join("0") + num;
+				var zero = places - 
+num.toString().length + 1;
+				return Array(+(zero > 0 && 
+zero)).join("0") + num;
 			}
 
 			var isOmega = function (device){
@@ -288,14 +347,16 @@
 			}
 
 			var isOmega2 = function (device){
-				if(device ==='Onion Omega2' || device === 'Onion Omega2+'){
+				if(device ==='Onion Omega2' || device 
+=== 'Onion Omega2+'){
 					return true;
 				}else{
 					return false;
 				}
 			}
 
-			// convert milliseconds to a human readable string
+			// convert milliseconds to a human readable 
+string
 			function millisecondsToStr (milliseconds) {
 				var 	ret 	= '';
 
@@ -303,19 +364,25 @@
 					return (number > 1) ? 's' : '';
 				}
 
-				var temp = Math.floor(milliseconds / 1000);
+				var temp = Math.floor(milliseconds / 
+1000);
 				var years = Math.floor(temp / 31536000);
 				if (years) {
-					ret = years + ' year' + numberEnding(years);
+					ret = years + ' year' + 
+numberEnding(years);
 				}
-				var days = Math.floor((temp %= 31536000) / 86400);
+				var days = Math.floor((temp %= 31536000) 
+/ 86400);
 				if (days) {
-					ret = ret + days + ' day' + numberEnding(days) + ' ';
+					ret = ret + days + ' day' + 
+numberEnding(days) + ' ';
 				}
-				var hours = Math.floor((temp %= 86400) / 3600);
+				var hours = Math.floor((temp %= 86400) / 
+3600);
 				ret = ret +  hours + ':';
 
-				var minutes = Math.floor((temp %= 3600) / 60);
+				var minutes = Math.floor((temp %= 3600) 
+/ 60);
 				ret = ret +  zeroPad(minutes, 2) + ':';
 
 				var seconds = temp % 60;
@@ -326,57 +393,95 @@
 
 			var refreshInfo = function () {
 				// Format the uptime, memory, and load
-				onionConsole.getService('onion-device-settings-provider', (function (err, deviceSettingsProvider) {
-					this.deviceSettingsProvider = deviceSettingsProvider;
+				
+onionConsole.getService('onion-device-settings-provider', (function 
+(err, deviceSettingsProvider) {
+					this.deviceSettingsProvider = 
+deviceSettingsProvider;
 					setInterval((function () {
-						this.deviceSettingsProvider.getSystem("", (function (err, result) {
-							if (!err && result) {
-								this.uptime = millisecondsToStr ( result.uptime * 1000 );
-								this.memoryFree		= (result.memory.total / 1024000 - result.memory.free / 1024000).toFixed(3);
-								this.memoryTotal	= (result.memory.total / 1024000).toFixed(3);
-								this.memory = (this.memoryFree) + ' MB / ' + (this.memoryTotal) + ' MB';
-								this.load = (result.load[0] / 100000).toFixed(4) + ' ' + (result.load[1] / 100000).toFixed(4) + ' ' + (result.load[2] / 100000).toFixed(4);
+						
+this.deviceSettingsProvider.getSystem("", (function (err, result) {
+							if (!err && 
+result) {
+								
+this.uptime = millisecondsToStr ( result.uptime * 1000 );
+								
+this.memoryFree		= (result.memory.total / 1024000 - 
+result.memory.free / 1024000).toFixed(3);
+								
+this.memoryTotal	= (result.memory.total / 1024000).toFixed(3);
+								
+this.memory = (this.memoryFree) + ' MB / ' + (this.memoryTotal) + ' MB';
+								
+this.load = (result.load[0] / 100000).toFixed(4) + ' ' + (result.load[1] 
+/ 100000).toFixed(4) + ' ' + (result.load[2] / 100000).toFixed(4);
 							}
 						}).bind(this));
 					}).bind(this), 1000);
 					
 					var self = this;
 					setInterval(function () {
-						self.updateFiscalDeviceStatus();
+						
+self.updateFiscalDeviceStatus();
 					}, 3000);
 
 
 
 					//Get MAC Address
-					// self.deviceSettingsProvider.getMAC(function (result) {
+					// 
+self.deviceSettingsProvider.getMAC(function (result) {
 					//     self.mac = result.mac;
 					// });
 
 					// Get if device is online
-					this.deviceSettingsProvider.isOnline("", (function (result) {
+					
+this.deviceSettingsProvider.isOnline("", (function (result) {
 						if (result=== true) {
-							this.$.online.style.display = 'block';
-							this.$.offline.style.display = 'none';
+							
+this.$.online.style.display = 'block';
+							
+this.$.offline.style.display = 'none';
 						} else {
-							this.$.online.style.display = 'none';
-							this.$.offline.style.display = 'block';
+							
+this.$.online.style.display = 'none';
+							
+this.$.offline.style.display = 'block';
 						}
 					}).bind(this));
 
-					// Get IP address, netmask and mac address
-					this.deviceSettingsProvider.getIpAddr("", (function (result) {
+					// Get IP address, netmask and 
+mac address
+					
+this.deviceSettingsProvider.getIpAddr("", (function (result) {
 						this.ip = result;
 					}).bind(this));
 
-					this.deviceSettingsProvider.getNetMask("", (function (result) {
+					
+this.deviceSettingsProvider.getNetMask("", (function (result) {
 						this.netmask = result;
 					}).bind(this));
 
-					this.deviceSettingsProvider.getMacAddr("", (function(result){
+					
+this.deviceSettingsProvider.getMacAddr("", (function(result){
 						this.mac = result;
 					}).bind(this));
+					
+					
+this.deviceSettingsProvider.getEthernetIpAddr("", (function (result) {
+						this.ethernetIP = 
+result.ip;
+						this.ethernetNetmask = 
+result.netmask;
+					}).bind(this));
 
-					//Get received and transmitted bytes
+					
+this.deviceSettingsProvider.getEthernetMacAddr("", (function(result){
+						this.ethernetMac = 
+result;
+					}).bind(this));
+
+					//Get received and transmitted 
+bytes
 					this.updateRxTx();
 					this.refreshRxTx(10000);
 					
@@ -389,7 +494,8 @@
 			};
 
 		    var refreshRxTx = function (interval) {
-			    refreshRxTxInterval = setInterval((function () {
+			    refreshRxTxInterval = setInterval((function 
+() {
 			    	this.updateRxTx()
 			    }).bind(this), interval);
 			};
@@ -400,12 +506,16 @@
 			};
 			
 			var updateFiscalDeviceStatus = function () {
-				this.deviceSettingsProvider.getFiscalDeviceStatus(null).then(function(result){
+				
+this.deviceSettingsProvider.getFiscalDeviceStatus(null).then(function(result){
 					this.fiscalDeviceUp = result.up;
 					if (result.lease) {
-						this.fiscalDeviceIP = result.lease.ip;
-						this.fiscalDeviceAddress = result.lease.address;
-						this.fiscalDeviceAlias = result.lease.device;
+						this.fiscalDeviceIP = 
+result.lease.ip;
+						this.fiscalDeviceAddress 
+= result.lease.address;
+						this.fiscalDeviceAlias = 
+result.lease.device;
 					}
 				}.bind(this))
 				.catch(function (err) {
@@ -414,10 +524,14 @@
 			};
 
 			var updateRxTx = function () {
-			    if (this.sessionProvider.isAlive() === true) {
-					this.deviceSettingsProvider.getRxTx("", (function (result) {
-						this.received 		= result[0].received;
-						this.transmitted 	= result[1].transmitted;
+			    if (this.sessionProvider.isAlive() === true) 
+{
+					
+this.deviceSettingsProvider.getRxTx("", (function (result) {
+						this.received 		
+= result[0].received;
+						this.transmitted 	
+= result[1].transmitted;
 					}).bind(this));
 				} else {
 				    this.stopRefreshRxTx();
@@ -425,84 +539,118 @@
 			};
 
 			var updateDiskUsage = function () {
-				if (this.sessionProvider.isAlive() === true) {
-					onionConsole.getService('onion-device-provider', (function (err, device) {
+				if (this.sessionProvider.isAlive() === 
+true) {
+					
+onionConsole.getService('onion-device-provider', (function (err, device) 
+{
 						this.device = device;
 						var params = {
-							command: '/usr/sbin/disk-space',
+							command: 
+'/usr/sbin/disk-space',
 							params: []
 						};
 
 						// make the device call
-						this.device.callService(null, 'file', 'exec', params, (function (err, data) {
-							if (!err && data) {
-								var diskData 	= String(data.stdout);
-								var diskFree 	= diskData.replace(/.*free:(\d+).*/, '$1');
-								this.diskUsed 	= diskData.replace(/.*used:(\d+).*/, '$1');
-								this.diskTotal 	= diskData.replace(/.*total:(\d+).*/, '$1');
+						
+this.device.callService(null, 'file', 'exec', params, (function (err, 
+data) {
+							if (!err && 
+data) {
+								var 
+diskData 	= String(data.stdout);
+								var 
+diskFree 	= diskData.replace(/.*free:(\d+).*/, '$1');
+								
+this.diskUsed 	= diskData.replace(/.*used:(\d+).*/, '$1');
+								
+this.diskTotal 	= diskData.replace(/.*total:(\d+).*/, '$1');
 
-								// find percentage of disk used
-								this.diskPercentage = ((this.diskUsed / this.diskTotal) * 100).toFixed(2)
+								// find 
+percentage of disk used
+								
+this.diskPercentage = ((this.diskUsed / this.diskTotal) * 
+100).toFixed(2)
 
-								// convert units to MB
-								this.diskUsed 	= (this.diskUsed / 1000).toFixed(3);
-								this.diskTotal 	= (this.diskTotal / 1000).toFixed(3);
+								// 
+convert units to MB
+								
+this.diskUsed 	= (this.diskUsed / 1000).toFixed(3);
+								
+this.diskTotal 	= (this.diskTotal / 1000).toFixed(3);
 							}
 						}).bind(this));
 					}).bind(this));
 				} else {
-				    alert('Session time out! Failed to get disk space data!');
+				    alert('Session time out! Failed to 
+get disk space data!');
 				}
 			};
 
 			var displayProcessorName = function (device) {
 				if (this.device === 'Onion Omega') {
-					return '400 MHz Atheros AR9331 MIPS';
-				} else if (this.device === 'Onion Omega2' || this.device === 'Onion Omega2+') {
-					return '580 MHz Ralink MT-7688 MIPS';
+					return '400 MHz Atheros AR9331 
+MIPS';
+				} else if (this.device === 'Onion 
+Omega2' || this.device === 'Onion Omega2+') {
+					return '580 MHz Ralink MT-7688 
+MIPS';
 				}
 			};
 
 			var displayMemorySize = function (device) {
-				// TO DO: replace this with a calculation
+				// TO DO: replace this with a 
+calculation
 				if (this.device === 'Onion Omega') {
 					return '64MB 400MHz DDR2';
-				} else if (this.device === 'Onion Omega2') {
+				} else if (this.device === 'Onion 
+Omega2') {
 					return '64MB 580MHz DDR2';
-				} else if (this.device === 'Onion Omega2+') {
+				} else if (this.device === 'Onion 
+Omega2+') {
 					return '128MB 580MHz DDR2';
 				}
 			};
 
-			var displayStorageSize = function (device, diskTotal) {
+			var displayStorageSize = function (device, 
+diskTotal) {
 				if (this.device === 'Onion Omega') {
 					return '16';
-				} else if (this.device === 'Onion Omega2') {
+				} else if (this.device === 'Onion 
+Omega2') {
 					return '16';
-				} else if (this.device === 'Onion Omega2+') {
+				} else if (this.device === 'Onion 
+Omega2+') {
 					return '32';
 				}
 			};
 			
 			var isFiscalDeviceReady = function () {
-				this.fiscalDeviceReady = (this.fiscalDeviceUp && this.fiscalDeviceIP.length > 3);
+				this.fiscalDeviceReady = 
+(this.fiscalDeviceUp && this.fiscalDeviceIP.length > 3);
 			};
 
 			/*
 			var refreshStatus = function (interval) {
-			    refreshStatusInterval = setInterval(function () {
+			    refreshStatusInterval = setInterval(function 
+() {
 				    updateStatus()
 				}, interval);
 			};
 
 			var updateStatus = function () {
 			  	ipProvider.getIP(function (result) {
-					if(result[0].available === true) {
-					    self.$.online.style.visibility = 'visible';
-						self.$.offline.style.visibility = 'hidden';
+					if(result[0].available === true) 
+{
+					    
+self.$.online.style.visibility = 'visible';
+						
+self.$.offline.style.visibility = 'hidden';
 					} else {
-					    self.$.online.style.visibility = 'hidden';
-					    self.$.offline.style.visibility = 'visible';
+					    
+self.$.online.style.visibility = 'hidden';
+					    
+self.$.offline.style.visibility = 'visible';
 				    }
 					self.ip = result[1].ip;
 				});
@@ -526,15 +674,20 @@
 				stopRefreshRxTx: stopRefreshRxTx,
 				updateRxTx: updateRxTx,
 				updateDiskUsage: updateDiskUsage,
-				displayProcessorName: displayProcessorName,
+				displayProcessorName: 
+displayProcessorName,
 				displayMemorySize: displayMemorySize,
 				displayStorageSize: displayStorageSize,
 				isOmega2: isOmega2,
 				isOmega: isOmega,
-				updateFiscalDeviceStatus: updateFiscalDeviceStatus,
-				isFiscalDeviceReady: isFiscalDeviceReady,
-				_fiscalDeviceIPChanged: _fiscalDeviceIPChanged,
-				getFiscalDeviceWebPage: getFiscalDeviceWebPage,
+				updateFiscalDeviceStatus: 
+updateFiscalDeviceStatus,
+				isFiscalDeviceReady: 
+isFiscalDeviceReady,
+				_fiscalDeviceIPChanged: 
+_fiscalDeviceIPChanged,
+				getFiscalDeviceWebPage: 
+getFiscalDeviceWebPage,
 				properties:{
 					hostname: String,
 					device: {
@@ -549,7 +702,8 @@
 					},
 					fiscalDeviceIP: {
 						type: String,
-						observer: '_fiscalDeviceIPChanged'
+						observer: 
+'_fiscalDeviceIPChanged'
 					},
 					fiscalDeviceReady: {
 						type: Boolean,
@@ -562,3 +716,4 @@
         })();
 	</script>
 </dom-module>
+
