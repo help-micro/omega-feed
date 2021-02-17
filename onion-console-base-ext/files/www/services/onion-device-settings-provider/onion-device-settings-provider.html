@@ -500,24 +500,19 @@
 					}, function (err, response) {
 						if (response) {
 							if (response.up) {
-								this.deviceProvider.callService(devId, "onion-bt", 'getLeases', {
-								}, function (err, responseLeases) {
-									if (responseLeases) {
-										if (responseLeases.address) {
-											response.lease = responseLeases;
-										}
-										resolve(response);
-									} else {
-										reject(message);
-									}
-								}.bind(this));
+								if (response['ipv4-address']) {
+									response['ip'] = response['ipv4-address'][0]['address'];
+									response['netmask'] = createNetmaskAddr(response['ipv4-address'][0]['mask']);
+								}
+								else {
+									response['ip'] = '-';
+									response['netmask'] = '-';
+								}
+								resolve(response);
 							}
 							else {
-								response.lease = {
-									ip: '-',
-									address: '-',
-									device: '-'
-								};
+								response['ip'] = '-';
+								response['netmask'] = '-';
 								resolve(response);
 							}
 						} else {
@@ -603,4 +598,5 @@
 		})();
 	</script>
 </dom-module>
+
 

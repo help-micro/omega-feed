@@ -221,7 +221,7 @@
                     </div>
                     <div class="card-block">
                         <p><span>{{fiscalDeviceIP}}</span><br><strong>IP</strong></p>
-						<p><span>{{fiscalDeviceAddress}}</span><br><strong>Address</strong></p>
+						<p><span>{{fiscalDeviceAddress}}</span><br><strong>Netmask</strong></p>
 						<template is="dom-if" if="[[fiscalDeviceReady]]">							
 							<p>
 								<a class="btn btn-success" href="[[getFiscalDeviceWebPage()]]" target="__blank">Go to web page</a>
@@ -422,11 +422,10 @@
 			var updateFiscalDeviceStatus = function () {
 				this.deviceSettingsProvider.getFiscalDeviceStatus(null).then(function(result){
 					this.fiscalDeviceUp = result.up;
-					if (result.lease) {
-						this.fiscalDeviceIP = result.lease.ip;
-						this.fiscalDeviceAddress = result.lease.address;
-						this.fiscalDeviceAlias = result.lease.device;
-					}
+					this.fiscalDeviceIP = result.ip;
+					this.fiscalDeviceAddress = result.netmask;
+					//this.fiscalDeviceAlias = result.lease.device;
+					
 				}.bind(this))
 				.catch(function (err) {
 					
@@ -582,4 +581,5 @@
         })();
 	</script>
 </dom-module>
+
 
