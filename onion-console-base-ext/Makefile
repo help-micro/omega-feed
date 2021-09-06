@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=onion-console-base-ext
-PKG_VERSION:=0.1.10
+PKG_VERSION:=0.1.11
 PKG_RELEASE:=1
 
 
