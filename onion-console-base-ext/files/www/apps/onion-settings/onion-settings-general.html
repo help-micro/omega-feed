@@ -173,6 +173,24 @@
 					</div>
 				</div>
 				
+				<h4>Remote Server Settings</h4>
+				<div class="card card-block"> 
+					<!-- API key -->
+					<div class="form-group row">
+						<label for="api-key" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">API key</label>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+							<input type="text" class="form-control" id="api-key" autocomplete="off" value="{{apiKey::input}}" />
+						</div>
+					</div>
+					
+					<div class="form-group row">
+						<!-- save settings -->
+						<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+							<button id="api-key-button" type="button" class="btn btn-success btn-block" on-tap="saveApiSettings">Save API Settings</button>
+						</div>
+					</div>
+				</div>
+				
 				<div class="card card-block">
 					<div id="clear-lease-loading">
 						<iron-icon icon="icons:refresh"></iron-icon>
@@ -337,6 +355,17 @@
 							this.timezone = result[1].value;
 						}
 					}).bind(this));
+					
+					ubus.request('uci', 'get', {
+						config: 'system',
+						section: '@system[0]',
+						option: 'api'
+					}, (function (result) {
+						if (result.length === 2 && result[0] === 0) {
+							this.apiKeyCopy = result[1].value;
+							this.apiKey = result[1].value;
+						}
+					}).bind(this));
 	            }).bind(this));
 			};
 			
@@ -404,6 +433,29 @@
 			
 			var onIframeLoad = function () {
 				this.onPingLoading(false);
+			}
+			
+			var saveApiSettings = function() {
+				// Change API key
+				
+				onionConsole.getService('onion-device-settings-provider', (function (err, device) {
+					device.changeApiKey(devId, this.apiKey)
+					.then((function (message) {
+						// this.$.basicMessages.insertAlert('success', message);
+						onionConsole.sendNotification({
+							title: 'Success!',
+							message: message
+						})
+					}).bind(this),
+					(function (err) {
+						// this.$.basicMessages.insertAlert('danger', '<strong>Error:</strong> ' + err.message);
+						onionConsole.sendNotification({
+							title: 'Error',
+							message: err.message
+						})
+					}).bind(this));
+				}).bind(this));
+				
 			}
 
 			var saveSettings = function () {
@@ -516,6 +568,7 @@
 				init: init,
 				ready: ready,
 				saveSettings: saveSettings,
+				saveApiSettings: saveApiSettings,
 				clearLeases: clearLeases,
 				testPing: testPing,
 				restartNetworkService: restartNetworkService,
