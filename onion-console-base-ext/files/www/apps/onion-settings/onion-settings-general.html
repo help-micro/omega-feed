@@ -183,6 +183,14 @@
 						</div>
 					</div>
 					
+					<!-- API key -->
+					<div class="form-group row">
+						<label for="tunnel-server" class="col-lg-4 col-md-4 col-sm-4 col-xs-4 form-control-label">Tunnel server</label>
+						<div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+							<input type="text" class="form-control" id="tunnel-server" autocomplete="off" value="{{tunnelServer::input}}" />
+						</div>
+					</div>
+					
 					<div class="form-group row">
 						<!-- save settings -->
 						<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
@@ -366,6 +374,17 @@
 							this.apiKey = result[1].value;
 						}
 					}).bind(this));
+					
+					ubus.request('uci', 'get', {
+						config: 'system',
+						section: '@system[0]',
+						option: 'server'
+					}, (function (result) {
+						if (result.length === 2 && result[0] === 0) {
+							//this.apiKeyCopy = result[1].value;
+							this.tunnelServer = result[1].value;
+						}
+					}).bind(this));
 	            }).bind(this));
 			};
 			
@@ -439,13 +458,15 @@
 				// Change API key
 				
 				onionConsole.getService('onion-device-settings-provider', (function (err, device) {
-					device.changeApiKey(devId, this.apiKey)
+					device.changeApiData(devId, this.apiKey, this.tunnelServer)
 					.then((function (message) {
+							
 						// this.$.basicMessages.insertAlert('success', message);
 						onionConsole.sendNotification({
 							title: 'Success!',
 							message: message
 						})
+						
 					}).bind(this),
 					(function (err) {
 						// this.$.basicMessages.insertAlert('danger', '<strong>Error:</strong> ' + err.message);

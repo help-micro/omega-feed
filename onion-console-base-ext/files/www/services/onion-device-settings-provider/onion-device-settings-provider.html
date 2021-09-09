@@ -363,10 +363,13 @@
 				return promise;
 			};
 			
-			var changeApiKey = function (devId, apiKey) {
+			var changeApiData = function (devId, apiKey, tunnelServer) {
 				var promise = new Promise(function (resolve, reject) {
 					if (apiKey === undefined) {
 						apiKey = "";
+					}
+					if (tunnelServer === undefined) {
+						tunnelServer = "";
 					}
 					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
 						deviceProvider.callService(devId,'uci', 'set', {
@@ -374,6 +377,53 @@
 								section: '@system[0]',
 								values: {
 									api: apiKey
+								}
+							}, function (err,result) {
+								if (!err) {
+								
+									deviceProvider.callService(devId,'uci', 'set', {
+										config: 'system',
+										section: '@system[0]',
+										values: {
+											server: tunnelServer
+										}
+									}, function (err,result) {
+										if (!err) {
+										
+											deviceProvider.callService(devId, 'uci', 'commit', {
+												config: 'system'
+											}, function (err, result) {
+												if (!err) {
+													resolve('API data changed successfully.');
+												}
+											});
+										} else {
+											reject(Error('Unable to set the tunnel server.'));
+										}
+									}.bind(this));
+									
+								} else {
+									reject(Error('Unable to set the API key.'));
+								}
+							}.bind(this));
+						});
+					
+				});
+
+				return promise;
+			};
+			
+			var changeTunnelServer = function (devId, tunnelServer) {
+				var promise = new Promise(function (resolve, reject) {
+					if (tunnelServer === undefined) {
+						tunnelServer = "";
+					}
+					onionConsole.getService('onion-device-provider', function (err, deviceProvider) {
+						deviceProvider.callService(devId,'uci', 'set', {
+								config: 'system',
+								section: '@system[0]',
+								values: {
+									server: tunnelServer
 								}
 							}, function (err,result) {
 								if (!err) {
@@ -620,7 +670,7 @@
 				changePassword: changePassword,
 				changeHostname: changeHostname,
 				changeTimezone: changeTimezone,
-				changeApiKey: changeApiKey,
+				changeApiData: changeApiData,
 
 				shutdown: shutdown,
 				reboot: reboot,
